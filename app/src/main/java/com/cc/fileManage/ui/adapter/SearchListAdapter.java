@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.R;
 import com.cc.fileManage.entity.ImageID;
-import com.cc.fileManage.ui.views.EllipsizingTextView;
+import com.cc.fileManage.ui.views.EllipsizeTextView;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -102,9 +102,9 @@ public class SearchListAdapter extends RecyclerView.Adapter<SearchListAdapter.Li
     public static class ListViewHolder extends RecyclerView.ViewHolder
     {
         //名称
-        EllipsizingTextView name;
+        EllipsizeTextView name;
         //描述
-        EllipsizingTextView time;
+        EllipsizeTextView time;
 
         //图标
         ImageView icon;

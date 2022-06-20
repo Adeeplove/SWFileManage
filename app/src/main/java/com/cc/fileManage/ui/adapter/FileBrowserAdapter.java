@@ -17,7 +17,7 @@ import com.cc.fileManage.R;
 import com.cc.fileManage.entity.ImageID;
 import com.cc.fileManage.file.ManageFile;
 import com.cc.fileManage.ui.callback.FileItemTouchHelperCallback;
-import com.cc.fileManage.ui.views.EllipsizingTextView;
+import com.cc.fileManage.ui.views.EllipsizeTextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -146,9 +146,9 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
     public static class BrowserViewHolder extends RecyclerView.ViewHolder
     {
         //名称
-        EllipsizingTextView name;
+        EllipsizeTextView name;
         //描述
-        EllipsizingTextView time;
+        EllipsizeTextView time;
 
         //图标
         ImageView icon;

@@ -18,7 +18,7 @@
         android:layout_alignParentLeft="true"
         android:scaleType="fitCenter" />
 
-    <com.cc.fileManage.ui.views.EllipsizingTextView
+    <com.cc.fileManage.ui.views.EllipsizeTextView
         android:id="@+id/file_browser_item_file_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
         android:textColor="#000000"
         android:textSize="15sp" />
 
-    <com.cc.fileManage.ui.views.EllipsizingTextView
+    <com.cc.fileManage.ui.views.EllipsizeTextView
         android:id="@+id/file_browser_item_file_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

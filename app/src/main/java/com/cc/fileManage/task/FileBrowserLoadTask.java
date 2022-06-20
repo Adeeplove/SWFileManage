@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.UriPermission;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
 import android.provider.DocumentsContract;
 import android.widget.Toast;
 
@@ -27,11 +25,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FileBrowserLoadTask implements Runnable{
+public class FileBrowserLoadTask extends AsynchronousTask<List<ManageFile>,String>{
 
     private final WeakReference<Context> weakReference;
-    //handler
-    private final Handler handler = new Handler(Looper.getMainLooper());
     ///
     private AlertDialog dialog;         //加载弹窗
 
@@ -47,20 +43,10 @@ public class FileBrowserLoadTask implements Runnable{
 
     private boolean isLoading = true;   //加载弹框
 
-    private boolean runState;           //状态
-
     private OnFileChangeListener onLoadFilesListener;
 
     public void setOnLoadFilesListener(OnFileChangeListener onLoadFilesListener) {
         this.onLoadFilesListener = onLoadFilesListener;
-    }
-
-    public void setRunState(boolean runState) {
-        this.runState = runState;
-    }
-
-    public boolean isRunState() {
-        return runState;
     }
 
     public void setPath(String path) {
@@ -95,66 +81,84 @@ public class FileBrowserLoadTask implements Runnable{
         return isShowHideFile;
     }
 
-    public FileBrowserLoadTask(WeakReference<Context> weakReference){
-        this.weakReference = weakReference;
+    public FileBrowserLoadTask(Context context){
+        this.weakReference = new WeakReference<>(context);
     }
 
     @Override
-    public void run() {
-        this.runState = true;
-        //定时显示弹窗
-        loadDialog();
+    protected void onPreExecute() {
+        getHandler().postDelayed(() -> {
+            if(isLoading){      //弹窗
+                Context context = weakReference.get();
+                if(context == null) return;
+                dialog = ProgressDialogUtil.showProgressDialog(context);
+            }
+        }, 400);
+    }
+
+    @Override
+    protected List<ManageFile> doInBackground() {
         //数据区
         List<ManageFile> data = new ArrayList<>();
-        try {
-            //不是根目录 则添加返回上一级item
-            if (!path.equals("/")) {
-                if (DFileMethod.isParentCanRead(path) || canReadSystemPath) {
-                    ManageFile manageFile = new JFile();
-                    manageFile.setTag(true);
-                    data.add(manageFile);
-                }
+        //不是根目录 则添加返回上一级item
+        if (!path.equals("/")) {
+            if (DFileMethod.isParentCanRead(path) || canReadSystemPath) {
+                ManageFile manageFile = new JFile();
+                manageFile.setTag(true);
+                data.add(manageFile);
             }
-            if(!runState)return;     //退出
-            //实例化文件对象
-            File file = new File(path);
-            //获取不到说明没有权限访问
-            if(file.exists()) {
-                if (file.canRead()) {
-                    if(!runState)return;     //退出
-                    //
-                    fileList(file, data);
-                } else if(DFileMethod.isAndroidDataDir(file)){
-                    if(!runState)return;     //退出
-                    //document file
-                    documentList(file, data);
-                } else {
-                    //
-                    toast("访问受限");
-                }
-            }else {
-                toast("不存在的路径");
-            }
-            if(!runState)return;     //退出
-            //排序
-            Collections.sort(data, new FileComparator<>());
-            //高亮
-            highlight(data);
-            //
-            if(!runState) return;     //退出
-            handler.post(() -> {
-                //更新数据
-                onLoadFilesListener.onFilesData(data, showItem, fileIndex);
-            });
-        } catch (Exception e) {
-            handler.post(() -> {
-                //更新数据
-                onLoadFilesListener.onFailure(e);
-            });
-        } finally {
-            handler.post(this::dismiss);
-            this.runState = false;
         }
+        //实例化文件对象
+        File file = new File(path);
+        //获取不到说明没有权限访问
+        if(file.exists()) {
+            if (file.canRead()) {
+                //
+                fileList(file, data);
+            } else if(DFileMethod.isAndroidDataDir(file)){
+                //document file
+                documentList(file, data);
+            } else {
+                publishProgress("2", "访问受限");
+            }
+        }else {
+            publishProgress("2", "不存在的路径");
+        }
+        ///========直接退出==============
+        if(isCancel()) return null;
+        //排序
+        Collections.sort(data, new FileComparator<>());
+        //高亮
+        highlight(data);
+        return data;
+    }
+
+    @Override
+    protected void onError(Exception e) {
+        //更新数据
+        onLoadFilesListener.onFailure(e);
+    }
+
+    @Override
+    protected void onProgressUpdate(String... msg) {
+        if(msg[0].equals("1")) {
+            //检查路径访问权限
+            validation();
+        }else {
+            Context context = weakReference.get();
+            if(context == null) return;
+            //
+            Toast.makeText(context, msg[1], Toast.LENGTH_SHORT).show();
+            //
+            dismiss();
+        }
+    }
+
+    @Override
+    protected void onPostExecute(List<ManageFile> data) {
+        dismiss();
+        //更新数据
+        onLoadFilesListener.onFilesData(data, showItem, fileIndex);
     }
 
     /**
@@ -186,7 +190,7 @@ public class FileBrowserLoadTask implements Runnable{
         File[] lists = file.listFiles();
         if(lists != null) {
             for(File f : lists){
-                if(!runState)return;     //退出
+                if(isCancel())return;     //退出
                 ///
                 if (!isShowHideFile && f.isHidden()) continue;
                 //添加
@@ -213,7 +217,7 @@ public class FileBrowserLoadTask implements Runnable{
             //
             Cursor cursor = null;
             try {
-                if(!runState)return;     //退出
+                if(isCancel())return;     //退出
                 //拿到子路径
                 Uri childrenUri = DocumentsContract
                         .buildChildDocumentsUriUsingTree(uri, DocumentsContract.getDocumentId(uri));
@@ -225,7 +229,7 @@ public class FileBrowserLoadTask implements Runnable{
 
                 //迭代
                 while (cursor.moveToNext()) {
-                    if(!runState)return;     //退出
+                    if(isCancel())return;     //退出
                     //是否是隐藏文件
                     if (!isShowHideFile) {
                         if (cursor.getString(0).startsWith("."))
@@ -249,7 +253,7 @@ public class FileBrowserLoadTask implements Runnable{
             }
         }else {
             /////
-            validation();
+            publishProgress("1");
         }
     }
 
@@ -268,34 +272,17 @@ public class FileBrowserLoadTask implements Runnable{
                 maps.put(up.getUri().getLastPathSegment(), "keys");
             }
         }
-        ///
-        handler.post(() -> {
-            //
-            //申请权限
-            //  primary:Android/data
-            //  primary:Android/obb
-            File file = new File(path);
-            if (file.getAbsolutePath().startsWith(DFileMethod.getAndroidPath() + "/data")) {
-                if(maps.get("primary:Android/data") == null)
-                    onLoadFilesListener.askPathPermission("data");
-            } else {
-                if(maps.get("primary:Android/obb") == null)
-                    onLoadFilesListener.askPathPermission("obb");
-            }
-        });
-    }
-
-    /**
-     * 定时显示弹窗
-     */
-    private void loadDialog() {
-        handler.postDelayed(() -> {
-            if(isLoading){      //弹窗
-                Context context = weakReference.get();
-                if(context == null) return;
-                dialog = ProgressDialogUtil.showProgressDialog(context);
-            }
-        }, 400);
+        //申请权限
+        //  primary:Android/data
+        //  primary:Android/obb
+        File file = new File(path);
+        if (file.getAbsolutePath().startsWith(DFileMethod.getAndroidPath() + "/data")) {
+            if(maps.get("primary:Android/data") == null)
+                onLoadFilesListener.askPathPermission("data");
+        } else {
+            if(maps.get("primary:Android/obb") == null)
+                onLoadFilesListener.askPathPermission("obb");
+        }
     }
 
     //关闭弹窗
@@ -304,21 +291,6 @@ public class FileBrowserLoadTask implements Runnable{
         if(dialog != null){
             dialog.dismiss();
         }
-    }
-
-    /**
-     * 吐司
-     * @param msg   消息
-     */
-    private void toast(String msg) {
-        handler.post(() -> {
-            Context context = weakReference.get();
-            if(context == null) return;
-            //
-            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-            //
-            dismiss();
-        });
     }
 
     //回调接口

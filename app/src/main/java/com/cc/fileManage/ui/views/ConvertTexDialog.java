@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -31,12 +30,8 @@ public class ConvertTexDialog extends Dialog implements View.OnClickListener{
     private CheckBox multiplyAlpha;
     //生成备份
     private CheckBox backup;
-    private TextView tips;
 
-    //取消 开始按钮
-    private Button cancel, start;
-
-    private boolean isFolder;
+    private final boolean isFolder;
 
     //图片格式类型数据
     private List<String> formatSpinnerData;
@@ -78,14 +73,15 @@ public class ConvertTexDialog extends Dialog implements View.OnClickListener{
         this.multiplyAlpha = findViewById(R.id.tex_multiplyAlpha);
         //
         this.backup = findViewById(R.id.tex_backup);
-        this.tips = findViewById(R.id.tex_tips);
+        TextView tips = findViewById(R.id.tex_tips);
         if(isFolder){
             backup.setVisibility(View.VISIBLE);
             tips.setVisibility(View.VISIBLE);
         }
         //按钮
-        this.cancel = findViewById(R.id.tex_cancel);
-        this.start = findViewById(R.id.tex_start);
+        //取消 开始按钮
+        Button cancel = findViewById(R.id.tex_cancel);
+        Button start = findViewById(R.id.tex_start);
         //
         cancel.setOnClickListener(this);
         start.setOnClickListener(this);

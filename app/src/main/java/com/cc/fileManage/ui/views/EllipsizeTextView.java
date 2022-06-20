@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressLint("AppCompatCustomView")
-public class EllipsizingTextView extends TextView {
+public class EllipsizeTextView extends TextView {
     private static final String ELLIPSIS = "...";
 
     //默认结尾
@@ -30,7 +30,7 @@ public class EllipsizingTextView extends TextView {
         void ellipsizeStateChanged(boolean ellipsized);
     }
 
-    private final List<EllipsizeListener> ellipsizeListeners = new ArrayList<EllipsizeListener>();
+    private final List<EllipsizeListener> ellipsizeListeners = new ArrayList<>();
     private boolean isEllipsized;
     private boolean isStale;
     private boolean programmaticChange;
@@ -39,15 +39,15 @@ public class EllipsizingTextView extends TextView {
     private float lineSpacingMultiplier = 1.0f;
     private float lineAdditionalVerticalPadding = 0.0f;
 
-    public EllipsizingTextView(Context context) {
+    public EllipsizeTextView(Context context) {
         super(context);
     }
 
-    public EllipsizingTextView(Context context, AttributeSet attrs) {
+    public EllipsizeTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public EllipsizingTextView(Context context, AttributeSet attrs, int defStyle) {
+    public EllipsizeTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 

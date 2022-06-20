@@ -40,21 +40,13 @@ public class ErrorActivity extends BaseActivity {
         }
 
         //退出
-        binding.errorExit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AppManager.getAppManager().finishAllActivity();
-            }
-        });
+        binding.errorExit.setOnClickListener(v -> AppManager.getAppManager().finishAllActivity());
         //重启
-        binding.errorReboot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ErrorActivity.this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
-            }
+        binding.errorReboot.setOnClickListener(v -> {
+            Intent intent = new Intent(ErrorActivity.this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
         });
     }
 }

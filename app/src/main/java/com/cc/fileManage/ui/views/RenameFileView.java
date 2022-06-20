@@ -1,7 +1,6 @@
 package com.cc.fileManage.ui.views;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
@@ -75,7 +74,7 @@ public class RenameFileView {
             //空字符
             if(TextUtils.isEmpty(text)){
                 dialog.dismiss();
-                toast("内容不能为空!");
+                Toast.makeText(context, "内容不能为空!", Toast.LENGTH_SHORT).show();
                 return;
             }
             if(onRenameFileListener != null)
@@ -87,10 +86,6 @@ public class RenameFileView {
                     .setOnClickListener(v -> name.setText(ClipboardUtils.getText() != null ?
                             ClipboardUtils.getText().toString() : ""));
         }
-    }
-
-    private void toast(String message){
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
     public interface OnRenameFileListener{

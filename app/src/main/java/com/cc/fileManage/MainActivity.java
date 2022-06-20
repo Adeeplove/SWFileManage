@@ -12,17 +12,14 @@ import android.view.Menu;
 
 import androidx.annotation.Nullable;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.databinding.ActivityMainBinding;
 import com.cc.fileManage.ui.activity.BaseActivity;
-import com.cc.fileManage.ui.filebrowser.FileBrowserFragment;
 import com.cc.fileManage.ui.views.RenameFileView;
 import com.cc.fileManage.utils.RPermissionUtil;
 import com.google.android.material.navigation.NavigationView;
@@ -30,7 +27,6 @@ import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
 
-import java.io.File;
 import java.util.List;
 
 public class MainActivity extends BaseActivity {

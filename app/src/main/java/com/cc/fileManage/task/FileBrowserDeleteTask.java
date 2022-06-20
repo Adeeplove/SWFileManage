@@ -1,7 +1,8 @@
 package com.cc.fileManage.task;
 
 import android.app.AlertDialog;
-import android.os.AsyncTask;
+
+import java.lang.ref.WeakReference;
 import java.util.List;
 import android.content.Context;
 import androidx.documentfile.provider.DocumentFile;
@@ -11,18 +12,18 @@ import com.cc.fileManage.file.DFileMethod;
 import com.cc.fileManage.file.JFile;
 import com.cc.fileManage.file.ManageFile;
 
-public class DeleteFilesTask extends AsyncTask<String, String, String>
+public class FileBrowserDeleteTask extends AsynchronousTask<String, String>
 {
-    private Context context;
+    private final WeakReference<Context> weakReference;
 
-    private AlertDialog log;
+    private AlertDialog dialog;
 
-    private List<ManageFile> data;
+    private final List<ManageFile> data;
 
     private OnDeleteListener onDeleteListener;
 
-    public DeleteFilesTask(Context context, List<ManageFile> data){
-        this.context = context;
+    public FileBrowserDeleteTask(Context context, List<ManageFile> data){
+        this.weakReference = new WeakReference<>(context);
         this.data = data;
     }
 
@@ -33,19 +34,23 @@ public class DeleteFilesTask extends AsyncTask<String, String, String>
     //执行后台任务前做一些UI操作
     @Override
     protected void onPreExecute() {
-        log = new AlertDialog.Builder(context).create();
-        log.setCancelable(false);
-        log.setMessage("正在删除...");
-        log.show();
+        Context context = weakReference.get();
+        if(context == null) return;
+        ///=====================
+        dialog = new AlertDialog.Builder(context).create();
+        dialog.setCancelable(false);
+        dialog.setMessage("正在删除...");
+        dialog.show();
     }
 
     //执行后台任务（耗时操作）,不可在此方法内修改UI
     @Override
-    protected String doInBackground(String... params)
-    {
+    protected String doInBackground() {
         try{
             for(ManageFile file : data){
-
+                Context context = weakReference.get();
+                if(context == null) break;
+                ///===
                 publishProgress("up", "正在删除 " + file.getFileName());
                 if(file instanceof JFile){
                     //删除文件
@@ -73,7 +78,7 @@ public class DeleteFilesTask extends AsyncTask<String, String, String>
     protected void onProgressUpdate(String... progresses)
     {
         if(progresses[0].equals("up"))
-            log.setMessage(progresses[1]);
+            dialog.setMessage(progresses[1]);
         else
             showDialog(progresses[1], progresses[2]);
     }
@@ -88,18 +93,20 @@ public class DeleteFilesTask extends AsyncTask<String, String, String>
         }catch(Exception e){
             e.printStackTrace();
         }finally{
-            if(log != null){
-                log.dismiss();
+            if(dialog != null){
+                dialog.dismiss();
             }
         }
     }
 
     /**
      *  提示信息
-     * @param title
-     * @param message
+     * @param title        标题
+     * @param message       信息
      */
     private void showDialog(String title, String message){
+        Context context = weakReference.get();
+        if(context == null) return;
         AlertDialog.Builder ab = new AlertDialog.Builder(context);
         ab.setTitle(title);
         ab.setMessage(message);
@@ -107,9 +114,9 @@ public class DeleteFilesTask extends AsyncTask<String, String, String>
     }
 
     /**
-     * delete dir 删除文件夹
-     * @param dir
-     * @return
+     * delete dir   删除文件夹
+     * @param dir   文件夹
+     * @return      删除结果
      */
     private boolean deleteDir(Context context, DocumentFile dir) {
         if (dir.isDirectory()) {

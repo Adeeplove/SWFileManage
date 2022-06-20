@@ -36,7 +36,7 @@ import com.cc.fileManage.file.JFile;
 import com.cc.fileManage.file.ManageFile;
 import com.cc.fileManage.module.FileMethod;
 import com.cc.fileManage.task.CThreadPool;
-import com.cc.fileManage.task.DeleteFilesTask;
+import com.cc.fileManage.task.FileBrowserDeleteTask;
 import com.cc.fileManage.task.FileBrowserLoadTask;
 import com.cc.fileManage.ui.BaseFragment;
 import com.cc.fileManage.ui.adapter.FileBrowserAdapter;
@@ -50,7 +50,6 @@ import com.cc.fileManage.utils.RPermissionUtil;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,19 +58,19 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
     //viewBind
     private FragmentFileBrowserBinding binding;
 
-    private boolean requestAccess = false;  //是否申请了权限
+    private boolean requestAccess = false;                          //是否申请了权限
     private LayoutAnimationController layoutAnimationController;    //item加载动画
 
-    private FileBrowserLoadTask loadFiles;        //文件数据载入线程
-    private int lastOffset, lastPosition;   //滑动位置
-    private String readFilePath;            //访问的路径
+    private FileBrowserLoadTask loadFiles;          //文件数据载入线程
+    private int lastOffset, lastPosition;           //滑动位置
+    private String readFilePath;                    //访问的路径
 
-    private boolean isCheckItem;            //是否选中了文件
-    private int checkFileNum;               //选中的文件数量
+    private boolean isCheckItem;                    //是否选中了文件
+    private int checkFileNum;                       //选中的文件数量
 
-    private int openFileIndex = -1;         //打开的文件下标
+    private int openFileIndex = -1;                 //打开的文件下标
 
-    private FileBrowserAdapter adapter;     //列表数据适配器
+    private FileBrowserAdapter adapter;             //列表数据适配器
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -266,12 +265,13 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
      */
     public void updateFileData(final String path, String showItem, final boolean flash, final boolean scrollToTop)
     {
-        if(loadFiles != null && loadFiles.isRunState()) {
-            System.out.println("setRunState");
-            loadFiles.setRunState(false);
+        ///=======================
+        if(loadFiles != null && loadFiles.isRunThread()) {
+            //取消线程任务
+            loadFiles.setCancel(true);
         }
         //
-        loadFiles = new FileBrowserLoadTask(new WeakReference<>(requireContext()));
+        loadFiles = new FileBrowserLoadTask(requireContext());
         loadFiles.setCanReadSystemPath(flash);
         loadFiles.setIsShowHideFile(true);
 
@@ -326,7 +326,6 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
 
             @Override
             public void onFailure(Exception e) {
-
             }
         });
         CThreadPool.getInstance().submit(loadFiles);
@@ -427,13 +426,13 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
             ad.setMessage("是否删除 " + data.get(0).getFileName() + "?");
         }
         ad.setPositiveButton("删除", (p1, p2) -> {
-            DeleteFilesTask delete = new DeleteFilesTask(requireContext(), data);
+            FileBrowserDeleteTask delete = new FileBrowserDeleteTask(requireContext(), data);
             delete.setOnDeleteListener(() -> {
                 setCheckFileNum(0);
                 setCheckItem(false);
                 updateFileData();
             });
-            delete.execute();
+            CThreadPool.getInstance().submit(delete);
         });
         ad.setNegativeButton("取消",null);
         ad.show();
@@ -574,20 +573,13 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
      * 返回上一级目录
      */
     public void backParent(){
-        if(isCheckItem()){
-            return;
-        }
-        //如果到最上级目录 返回
-        if(getReadFilePath().equals(File.separator)){
-            return;
-        }
-
+        //如果选中或者是最上级目录 返回
+        if(isCheckItem() || getReadFilePath().equals(File.separator)) return;
         //第二级目录 点返回 就进根目录
         if(CharUtil.charNum(getReadFilePath(), File.separator) == 2){
             updateFileData(File.separator);
             return;
         }
-
         //父目录可读
         if(isParentCanRead()){
             updateFileData(new File(readFilePath).getParent() + File.separator);
