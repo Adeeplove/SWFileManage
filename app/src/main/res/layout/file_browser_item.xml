@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:descendantFocusability="blocksDescendants"
+    android:id="@+id/file_browser_item_parent"
+    android:layout_width="match_parent"
+    android:layout_height="55dp"
+    android:foreground="?attr/selectableItemBackground"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+    android:gravity="center">
+
+    <ImageView
+        android:id="@+id/file_browser_item_file_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:scaleType="fitCenter" />
+
+    <com.cc.fileManage.ui.views.EllipsizingTextView
+        android:id="@+id/file_browser_item_file_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginLeft="5dp"
+        android:layout_toRightOf="@id/file_browser_item_file_icon"
+        android:gravity="left|center"
+        android:text="text"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#000000"
+        android:textSize="15sp" />
+
+    <com.cc.fileManage.ui.views.EllipsizingTextView
+        android:id="@+id/file_browser_item_file_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/file_browser_item_file_name"
+        android:layout_alignParentEnd="true"
+        android:layout_marginLeft="5dp"
+        android:layout_toRightOf="@id/file_browser_item_file_icon"
+        android:gravity="top"
+        android:text="Text"
+        android:textSize="13sp" />
+</RelativeLayout>
