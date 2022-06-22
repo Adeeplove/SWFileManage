@@ -1,4 +1,4 @@
-package com.cc.fileManage.task;
+package com.cc.fileManage.task.fileBrowser;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -10,11 +10,12 @@ import android.widget.Toast;
 
 import androidx.documentfile.provider.DocumentFile;
 
-import com.cc.fileManage.file.DFile;
-import com.cc.fileManage.file.DFileMethod;
-import com.cc.fileManage.file.FileComparator;
-import com.cc.fileManage.file.JFile;
-import com.cc.fileManage.file.ManageFile;
+import com.cc.fileManage.entity.file.DFile;
+import com.cc.fileManage.entity.file.DFileMethod;
+import com.cc.fileManage.entity.file.FileComparator;
+import com.cc.fileManage.entity.file.JFile;
+import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.task.AsynchronousTask;
 import com.cc.fileManage.utils.ProgressDialogUtil;
 
 import java.io.File;
@@ -25,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FileBrowserLoadTask extends AsynchronousTask<List<ManageFile>,String>{
+public class FileBrowserLoadTask extends AsynchronousTask<List<ManageFile>,String> {
 
     private final WeakReference<Context> weakReference;
     ///

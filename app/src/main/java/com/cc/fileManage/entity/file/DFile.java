@@ -1,4 +1,4 @@
-package com.cc.fileManage.file;
+package com.cc.fileManage.entity.file;
 
 import android.provider.DocumentsContract;
 import androidx.documentfile.provider.DocumentFile;

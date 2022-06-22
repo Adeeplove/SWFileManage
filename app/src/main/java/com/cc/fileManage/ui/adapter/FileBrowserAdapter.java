@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cc.fileManage.R;
 import com.cc.fileManage.entity.ImageID;
-import com.cc.fileManage.file.ManageFile;
+import com.cc.fileManage.entity.file.ManageFile;
 import com.cc.fileManage.ui.callback.FileItemTouchHelperCallback;
 import com.cc.fileManage.ui.views.EllipsizeTextView;
 

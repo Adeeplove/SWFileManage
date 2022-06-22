@@ -28,16 +28,16 @@ import com.blankj.utilcode.util.PathUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.R;
 import com.cc.fileManage._static.FileMethodType;
-import com.cc.fileManage.callback.ConvertTexCallback;
-import com.cc.fileManage.callback.SearchFilesCallback;
+import com.cc.fileManage.task.tex.ConvertTexTask;
+import com.cc.fileManage.task.module.SearchFilesTask;
 import com.cc.fileManage.databinding.FragmentFileBrowserBinding;
-import com.cc.fileManage.file.DFileMethod;
-import com.cc.fileManage.file.JFile;
-import com.cc.fileManage.file.ManageFile;
+import com.cc.fileManage.entity.file.DFileMethod;
+import com.cc.fileManage.entity.file.JFile;
+import com.cc.fileManage.entity.file.ManageFile;
 import com.cc.fileManage.module.FileMethod;
 import com.cc.fileManage.task.CThreadPool;
-import com.cc.fileManage.task.FileBrowserDeleteTask;
-import com.cc.fileManage.task.FileBrowserLoadTask;
+import com.cc.fileManage.task.fileBrowser.FileBrowserDeleteTask;
+import com.cc.fileManage.task.fileBrowser.FileBrowserLoadTask;
 import com.cc.fileManage.ui.BaseFragment;
 import com.cc.fileManage.ui.adapter.FileBrowserAdapter;
 import com.cc.fileManage.ui.adapter.SearchListAdapter;
@@ -266,10 +266,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
     public void updateFileData(final String path, String showItem, final boolean flash, final boolean scrollToTop)
     {
         ///=======================
-        if(loadFiles != null && loadFiles.isRunThread()) {
-            //取消线程任务
-            loadFiles.setCancel(true);
-        }
+        CThreadPool.getInstance().stopAsynchronousTask(loadFiles);
         //
         loadFiles = new FileBrowserLoadTask(requireContext());
         loadFiles.setCanReadSystemPath(flash);
@@ -328,7 +325,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
             public void onFailure(Exception e) {
             }
         });
-        CThreadPool.getInstance().submit(loadFiles);
+        CThreadPool.getInstance().executeAsynchronousTask(loadFiles);
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -432,7 +429,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
                 setCheckItem(false);
                 updateFileData();
             });
-            CThreadPool.getInstance().submit(delete);
+            CThreadPool.getInstance().executeAsynchronousTask(delete);
         });
         ad.setNegativeButton("取消",null);
         ad.show();
@@ -516,7 +513,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
                         checkFiles.add(file);
                     }
                     //show
-                    SearchFilesCallback searchFilesCallback = new SearchFilesCallback(getActivity(), checkFiles);
+                    SearchFilesTask searchFilesCallback = new SearchFilesTask(getActivity(), checkFiles);
                     searchFilesCallback.setOnSearchDataListener(this::showDataView);
                     searchFilesCallback.showSearchView("*.*");
                 case 400:
@@ -527,8 +524,8 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
                         ConvertTexDialog convertTexDialog = new ConvertTexDialog(requireContext(), file.isDirectory());
                         convertTexDialog.setOnStartClickListener((format, type, isGenerate, isMultiplyAlpha, isBackup) -> {
                             //
-                            ConvertTexCallback convertTexCallback =
-                                    new ConvertTexCallback(getContext(), new File(file.getFilePath()));
+                            ConvertTexTask convertTexCallback =
+                                    new ConvertTexTask(getContext(), new File(file.getFilePath()));
                             convertTexCallback.setPixelFormat(format);
                             convertTexCallback.setTextureType(type);
                             convertTexCallback.setGenerateMipmaps(isGenerate);
@@ -540,7 +537,8 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
                                     ToastUtils.showShort("失败!");
                                 }
                             });
-                            convertTexCallback.execute();
+                            //执行
+                            CThreadPool.getInstance().executeAsynchronousTask(convertTexCallback);
                         });
                         convertTexDialog.show();
                     }

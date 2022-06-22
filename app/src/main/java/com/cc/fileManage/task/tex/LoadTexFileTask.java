@@ -1,42 +1,39 @@
-package com.cc.fileManage.callback;
+package com.cc.fileManage.task.tex;
 
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.widget.Toast;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.entity.TEXFile;
+import com.cc.fileManage.task.AsynchronousTask;
 import com.cc.fileManage.utils.CommonUtil;
 import com.cc.fileManage.utils.TexFileUtil;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 
-public class LoadTexFileCallback extends AsyncTask<String, String, Bitmap>
+public class LoadTexFileTask extends AsynchronousTask<Bitmap, String>
 {
-    private Context context;
+    private final WeakReference<Context> weakReference;
 
-    private File texFile;
-
-    private InputStream inputFile;
+    private final InputStream inputFile;
 
     //TEXTool
     private TEXFile currentFile;
-
     //弹框
     private ProgressDialog dialog;
-
     //监听
     private LoadImageListener loadImageListener;
 
-    public LoadTexFileCallback(Context context, File texFile){
-        this.context = context;
-        this.texFile = texFile;
+    public LoadTexFileTask(Context context, File texFile) throws FileNotFoundException {
+        this(context, new FileInputStream(texFile));
     }
 
-    public LoadTexFileCallback(Context context, InputStream inputFile){
-        this.context = context;
+    public LoadTexFileTask(Context context, InputStream inputFile){
+        this.weakReference = new WeakReference<>(context);
         this.inputFile = inputFile;
     }
 
@@ -48,6 +45,8 @@ public class LoadTexFileCallback extends AsyncTask<String, String, Bitmap>
     @Override
     protected void onPreExecute()
     {
+        Context context = weakReference.get();
+        if(context == null) return;
         dialog = new ProgressDialog(context);
         dialog.setMessage("正在加载...");
         dialog.setCancelable(false);
@@ -55,13 +54,10 @@ public class LoadTexFileCallback extends AsyncTask<String, String, Bitmap>
     }
 
     @Override
-    protected Bitmap doInBackground(String[] p1)
+    protected Bitmap doInBackground()
     {
         try{
-            if(texFile != null)
-                return openTexFile(texFile);
-            else
-                return openTexFile(inputFile);
+            return openTexFile(inputFile);
         }catch(Exception e){
             e.printStackTrace();
             publishProgress("打开失败");
@@ -72,7 +68,7 @@ public class LoadTexFileCallback extends AsyncTask<String, String, Bitmap>
     @Override
     protected void onProgressUpdate(String[] values)
     {
-        Toast.makeText(context, values[0], Toast.LENGTH_SHORT).show();
+        ToastUtils.showShort(values[0]);
     }
 
     @Override
@@ -90,12 +86,6 @@ public class LoadTexFileCallback extends AsyncTask<String, String, Bitmap>
 
         if(result != null)
             loadImageListener.loadImage(result, currentFile);
-    }
-
-    //打开tex文件
-    private Bitmap openTexFile(File file) throws Exception{
-        FileInputStream fi = new FileInputStream(file);
-        return openTexFile(fi);
     }
 
     //打开texFile

@@ -1,14 +1,13 @@
-package com.cc.fileManage.task;
+package com.cc.fileManage.task.module;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 
 import com.blankj.utilcode.util.ClipboardUtils;
+import com.cc.fileManage.task.AsynchronousTask;
 import com.cc.fileManage.utils.CharUtil;
 
 import java.io.BufferedReader;
@@ -16,25 +15,28 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-public class TranslationTask extends AsyncTask<String,Integer,String>
+public class TranslationTask extends AsynchronousTask<String,Integer>
 {
-    private Context context;
+    private final WeakReference<Context> weakReference;
     private ProgressDialog dialog;
 
-    private String text;
+    private final String text;
 
     public TranslationTask(String text, Context context){
         this.text = text;
-        this.context = context;
+        this.weakReference = new WeakReference<>(context);
     }
 
     @Override
     protected void onPreExecute()
     {
+        Context context = weakReference.get();
+        if(context == null) return;
         dialog = new ProgressDialog(context);
         dialog.setMessage("正在翻译...");
         dialog.setCancelable(false);
@@ -42,7 +44,7 @@ public class TranslationTask extends AsyncTask<String,Integer,String>
     }
 
     @Override
-    protected String doInBackground(String[] p1)
+    protected String doInBackground()
     {
         return tranText(handlerString(text));
     }
@@ -50,6 +52,12 @@ public class TranslationTask extends AsyncTask<String,Integer,String>
     @Override
     protected void onPostExecute(final String result)
     {
+        if(dialog != null)
+            dialog.dismiss();
+        ///======================
+        Context context = weakReference.get();
+        if(context == null) return;
+        ///=========
         AlertDialog.Builder ab = new AlertDialog.Builder(context);
         String space = " &nbsp&nbsp&nbsp&nbsp ";
 
@@ -63,17 +71,11 @@ public class TranslationTask extends AsyncTask<String,Integer,String>
         link.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
 
         ab.setView(link);
-        ab.setPositiveButton("复制结果", new DialogInterface.OnClickListener(){
-            @Override
-            public void onClick(DialogInterface p1, int p2)
-            {
-                //copy
-                ClipboardUtils.copyText(result);
-            }
+        ab.setPositiveButton("复制结果", (p1, p2) -> {
+            //copy
+            ClipboardUtils.copyText(result);
         });
         ab.show();
-        if(dialog != null)
-            dialog.dismiss();
     }
 
     /**
@@ -82,9 +84,9 @@ public class TranslationTask extends AsyncTask<String,Integer,String>
      * @return          翻译结果
      */
     private String tranText(String content){
-        HttpURLConnection conn = null;
+        HttpURLConnection conn;
         String urlStr="https://m.youdao.com/translate";
-        InputStream is = null;
+        InputStream is;
         String resultData = "";
         try {
             URL url = new URL(urlStr); //URL对象
@@ -105,7 +107,7 @@ public class TranslationTask extends AsyncTask<String,Integer,String>
                 is = conn.getInputStream();   //获取输入流
                 InputStreamReader isr = new InputStreamReader(is);
                 BufferedReader bufferReader = new BufferedReader(isr);
-                String inputLine = "";
+                String inputLine;
                 while ((inputLine = bufferReader.readLine()) != null) {
 
                     if(inputLine.contains("<li>") && inputLine.contains("</li>") && !inputLine.contains("</a>")){
@@ -130,8 +132,8 @@ public class TranslationTask extends AsyncTask<String,Integer,String>
 
     /**
      *
-     * @param code
-     * @return
+     * @param code  文本
+     * @return      处理后的文本
      */
     private String handlerString(String code){
         if(CharUtil.isChinese(code) || code.length() < 1)
@@ -159,7 +161,7 @@ public class TranslationTask extends AsyncTask<String,Integer,String>
                         //判断前一个字符跟后一个是否是大写
                         if(!isStringUp(old) && !isStringUp(chStr[i + 1]))
                             //前面添加空格
-                            strb.append(" " + ch);
+                            strb.append(" ").append(ch);
                         else
                             strb.append(ch);
                     }else{
@@ -187,8 +189,6 @@ public class TranslationTask extends AsyncTask<String,Integer,String>
     }
     //是否是大写字母
     private boolean isStringUp(char ch){
-        if(ch > 64 && ch < 91 )
-            return true;
-        return false;
+        return ch > 64 && ch < 91;
     }
 }

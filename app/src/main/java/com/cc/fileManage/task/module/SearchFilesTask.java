@@ -1,8 +1,7 @@
-package com.cc.fileManage.callback;
+package com.cc.fileManage.task.module;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.view.View;
@@ -15,25 +14,26 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.R;
-import com.cc.fileManage.file.JFile;
-import com.cc.fileManage.file.ManageFile;
+import com.cc.fileManage.entity.file.JFile;
+import com.cc.fileManage.entity.file.ManageFile;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchFilesCallback extends AsyncTask<String, String, String>
+public class SearchFilesTask extends AsyncTask<String, String, String>
 {
-    private Activity context;
+    private final WeakReference<Context> weakReference;
 
     //搜索的文件数据
-    private List<ManageFile> fileData;
+    private final List<ManageFile> fileData;
     //搜索到的内容
-    private List<File> searchData;
+    private final List<File> searchData;
 
     ///================
     private boolean searchSubdirectory = true;   //搜索子目录
@@ -59,8 +59,8 @@ public class SearchFilesCallback extends AsyncTask<String, String, String>
         this.onSearchDataListener = onSearchDataListener;
     }
 
-    public SearchFilesCallback(Activity context, List<ManageFile> fileData){
-        this.context = context;
+    public SearchFilesTask(Context context, List<ManageFile> fileData){
+        this.weakReference = new WeakReference<>(context);
         this.fileData = fileData;
         this.searchData = new ArrayList<>();
     }
@@ -83,7 +83,6 @@ public class SearchFilesCallback extends AsyncTask<String, String, String>
                     filePattern(((JFile) manageFile).getFile(), searchContent);
             }catch(Exception e){
                 publishProgress("error",e.getMessage());
-                continue;
             }
         }
         return null;
@@ -135,10 +134,11 @@ public class SearchFilesCallback extends AsyncTask<String, String, String>
      *  搜索弹窗
      */
     public void showSearchView(String searchText){
+        Context context = weakReference.get();
+        if(context == null) return;
+        //===============
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
-        View view = context.getLayoutInflater().inflate(R.layout.search_files,null);
-
+        View view = View.inflate(context, R.layout.search_files,null);
         //搜索内容
         final EditText edit = view.findViewById(R.id.search_files_edit);
         edit.setText(searchText);
@@ -154,30 +154,25 @@ public class SearchFilesCallback extends AsyncTask<String, String, String>
         final EditText subEdit = view.findViewById(R.id.search_files_content);
 
         builder.setView(view);
-        builder.setNegativeButton("搜索", new DialogInterface.OnClickListener(){
-            @Override
-            public void onClick(DialogInterface p1, int p2)
-            {
-                //搜索内容
-                searchContent = edit.getText() == null ? "" : edit.getText().toString();
-                if(TextUtils.isEmpty(searchContent)){
-                    ToastUtils.showShort("搜索内容为空!");
-                    return;
-                }
-
-                //文件内容
-                subContent = subEdit.getText() == null ? "" : subEdit.getText().toString();
-                if(TextUtils.isEmpty(subContent)){
-                    subContent = null;
-                }
-                //搜索子目录
-                searchSubdirectory = box.isChecked();
-                //区分大小写
-                caseSensitive = big.isChecked();
-
-                //运行线程
-                execute();
+        builder.setNegativeButton("搜索", (p1, p2) -> {
+            //搜索内容
+            searchContent = edit.getText() == null ? "" : edit.getText().toString();
+            if(TextUtils.isEmpty(searchContent)){
+                ToastUtils.showShort("搜索内容为空!");
+                return;
             }
+            //文件内容
+            subContent = subEdit.getText() == null ? "" : subEdit.getText().toString();
+            if(TextUtils.isEmpty(subContent)){
+                subContent = null;
+            }
+            //搜索子目录
+            searchSubdirectory = box.isChecked();
+            //区分大小写
+            caseSensitive = big.isChecked();
+
+            //运行线程
+            execute();
         });
         builder.setNeutralButton("取消", null);
         builder.show();
@@ -187,22 +182,20 @@ public class SearchFilesCallback extends AsyncTask<String, String, String>
      * 搜索信息弹框
      */
     private void showMessageView(){
+        Context context = weakReference.get();
+        if(context == null) return;
         //view
-        View view = context.getLayoutInflater().inflate(R.layout.search_message,null);
+        View view = View.inflate(context, R.layout.search_message,null);
 
         message = view.findViewById(R.id.search_message_text);
         size = view.findViewById(R.id.search_message_size);
         cancel = view.findViewById(R.id.search_message_button);
 
-        cancel.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View p1)
-            {
-                //取消线程
-                cancel(true);
-                //不可点击
-                cancel.setEnabled(false);
-            }
+        cancel.setOnClickListener(p1 -> {
+            //取消线程
+            cancel(true);
+            //不可点击
+            cancel.setEnabled(false);
         });
 
         dialog = new AlertDialog.Builder(context).create();
@@ -215,6 +208,9 @@ public class SearchFilesCallback extends AsyncTask<String, String, String>
      * 错误弹框
      */
     private void showErrorView(String message){
+        Context context = weakReference.get();
+        if(context == null) return;
+        ///
         AlertDialog.Builder adb = new AlertDialog.Builder(context);
         adb.setTitle("错误");
         adb.setMessage(message);
@@ -223,28 +219,19 @@ public class SearchFilesCallback extends AsyncTask<String, String, String>
 
     /**
      * @param file File 起始文件夹
-     * @return ArrayList 其文件夹下的文件夹
      */
     private void filePattern(File file, String search) {
         //更新信息
         publishProgress("text", file.getPath());
         publishProgress("size", "已找到: " + searchData.size());
 
-        if (file == null) {
-            return;
-        }
-        //是文件
-        else if (file.isFile())
+        if (file.isFile())
         {
             if(isCancelled()){
                 return;
             }
             //判断
             fileIsMatch(search, file);
-
-            if(isCancelled()){
-                return;
-            }
         }
         //文件夹
         else if (file.isDirectory())
@@ -287,10 +274,8 @@ public class SearchFilesCallback extends AsyncTask<String, String, String>
     private void fileIsMatch(String search, File file){
         //区分大小写
         if(caseSensitive){
-            if(file.isHidden()){
-            }
             //判断是否匹配
-            else if (wildcardMatch(search, file.getName())) {
+            if (!file.isHidden() && wildcardMatch(search, file.getName())) {
                 if(subContent != null){
                     if(isHaveContent(file))
                         searchData.add(file);
@@ -301,10 +286,8 @@ public class SearchFilesCallback extends AsyncTask<String, String, String>
             }
         }
         else{
-            if(file.isHidden()){
-            }
             //判断是否匹配
-            else if (wildcardMatch(search.toLowerCase(), file.getName().toLowerCase())) {
+            if (file.isHidden() && wildcardMatch(search.toLowerCase(), file.getName().toLowerCase())) {
                 if(subContent != null){
                     if(isHaveContent(file))
                         searchData.add(file);
@@ -369,14 +352,14 @@ public class SearchFilesCallback extends AsyncTask<String, String, String>
             inputStreamReader = new InputStreamReader(new FileInputStream(file), fileEncode);
             bufferedReader = new BufferedReader(inputStreamReader);
 
-            String lineStr = "";
+            String lineStr;
             while ((lineStr = bufferedReader.readLine()) != null) {
                 if(lineStr.contains(subContent)){
                     return true;
                 }
             }
         }catch (Exception e) {
-            e.getLocalizedMessage();
+            e.printStackTrace();
         }finally {
             try {
                 if(inputStreamReader!=null)inputStreamReader.close();

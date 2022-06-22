@@ -3,7 +3,7 @@ package com.cc.fileManage.module;
 import android.content.Context;
 import android.content.Intent;
 
-import com.cc.fileManage.file.FileComparator;
+import com.cc.fileManage.entity.file.FileComparator;
 import com.cc.fileManage.ui.activity.EditActivity;
 import com.cc.fileManage.ui.activity.LoadTexActivity;
 import com.cc.fileManage.ui.activity.PhotoActivity;

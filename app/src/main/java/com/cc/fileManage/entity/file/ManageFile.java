@@ -1,4 +1,4 @@
-package com.cc.fileManage.file;
+package com.cc.fileManage.entity.file;
 
 import androidx.annotation.NonNull;
 

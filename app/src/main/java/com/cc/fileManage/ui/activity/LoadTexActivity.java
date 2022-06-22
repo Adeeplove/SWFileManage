@@ -2,25 +2,24 @@ package com.cc.fileManage.ui.activity;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.boycy815.pinchimageview.PinchImageView;
 import com.cc.fileManage.R;
-import com.cc.fileManage.callback.LoadTexFileCallback;
-import com.cc.fileManage.callback.SaveTexFileCallback;
 import com.cc.fileManage.databinding.ActicityTexBinding;
 import com.cc.fileManage.entity.TEXFile;
-import com.cc.fileManage.file.ManageFile;
+import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.task.CThreadPool;
+import com.cc.fileManage.task.tex.LoadTexFileTask;
+import com.cc.fileManage.task.tex.SaveTexFileTask;
 import com.cc.fileManage.utils.CommonUtil;
 
 import java.io.File;
@@ -62,10 +61,10 @@ public class LoadTexActivity extends BaseActivity
      */
     public void initViews() {
         setSupportActionBar(binding.openTexToolbar);
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-
+        if(getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
         //设置点击事件
         initListener();
     }
@@ -129,11 +128,11 @@ public class LoadTexActivity extends BaseActivity
      * 打开tex文件
      * @param file tex文件
      */
+    @SuppressLint("SetTextI18n")
     private void openTexFile(File file){
-        LoadTexFileCallback load = new LoadTexFileCallback(this, file);
-        load.setLoadImageListener(new LoadTexFileCallback.LoadImageListener() {
-            @Override
-            public void loadImage(Bitmap bitmap, TEXFile texFile) {
+        try {
+            LoadTexFileTask load = new LoadTexFileTask(this, file);
+            load.setLoadImageListener((bitmap, texFile) -> {
                 //set
                 LoadTexActivity.this.texImage = bitmap;
                 LoadTexActivity.this.texFile = texFile;
@@ -141,7 +140,7 @@ public class LoadTexActivity extends BaseActivity
                 if(texImage != null){
                     binding.openTexImage.setImageBitmap(texImage);
                     TEXFile.PixelFormat format = TEXFile.PixelFormat.getType((int)texFile.File.Header.PixelFormat);
-                    String texFormat = formatString(format);
+                    String texFormat = format == null ? "未知" : formatString(format);
 
                     binding.openTexSubtitle.setText("宽高: "+texImage.getWidth() +" * "+texImage.getHeight()+"  格式: " + texFormat);
                 }else{
@@ -150,9 +149,11 @@ public class LoadTexActivity extends BaseActivity
                 }
                 //
                 binding.openTexImage.setScaleType(PinchImageView.ScaleType.FIT_CENTER);
-            }
-        });
-        load.execute();
+            });
+            CThreadPool.getInstance().executeAsynchronousTask(load);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -160,25 +161,19 @@ public class LoadTexActivity extends BaseActivity
      */
     private void initListener(){
         //点击事件
-        binding.openTexImage.setOnClickListener(new OnClickListener(){
-            @Override
-            public void onClick(View p1){
-                if(show){
-                    toolbarAnimal(1);//隐藏toolBar
-                    show = false;
-                }else{
-                    toolbarAnimal(0);//显示toolBar
-                    show = true;
-                }
+        binding.openTexImage.setOnClickListener(p1 -> {
+            if(show){
+                toolbarAnimal(1);//隐藏toolBar
+                show = false;
+            }else{
+                toolbarAnimal(0);//显示toolBar
+                show = true;
             }
         });
         //
-        binding.openTexImage.setOnLongClickListener(new OnLongClickListener(){
-            @Override
-            public boolean onLongClick(View p1) {
-                showBitmapInfo();
-                return true;
-            }
+        binding.openTexImage.setOnLongClickListener(p1 -> {
+            showBitmapInfo();
+            return true;
         });
     }
 
@@ -192,13 +187,13 @@ public class LoadTexActivity extends BaseActivity
 
             //tex 图片格式
             TEXFile.PixelFormat format = TEXFile.PixelFormat.getType((int)texFile.File.Header.PixelFormat);
-            String texFormat = formatString(format);
+            String texFormat = format == null ? "未知" : formatString(format);
 
             //tex 纹理
             TEXFile.Mipmap mipmap = texFile.GetMainMipmap();
             //tex type
             TEXFile.TextureType type = TEXFile.TextureType.getType((int)texFile.File.Header.TextureType);
-            String texType = typeString(type);
+            String texType = type == null ? "未知" : typeString(type);
 
             File file = new File(texPath);
             AlertDialog.Builder ab = new AlertDialog.Builder(this);
@@ -218,23 +213,23 @@ public class LoadTexActivity extends BaseActivity
 
     /**
      * tex 格式
-     * @param format
-     * @return
+     * @param format    格式
+     * @return          格式
      */
     public String formatString(TEXFile.PixelFormat format){
         switch(format){
             case DXT1:
-                return format.DXT1.getName();
+                return TEXFile.PixelFormat.DXT1.getName();
             case DXT3:
-                return format.DXT3.getName();
+                return TEXFile.PixelFormat.DXT3.getName();
             case DXT5:
-                return format.DXT5.getName();
+                return TEXFile.PixelFormat.DXT5.getName();
             case ARGB:
-                return format.ARGB.getName();
+                return TEXFile.PixelFormat.ARGB.getName();
             case RGB:
-                return format.RGB.getName();
+                return TEXFile.PixelFormat.RGB.getName();
             case Un18:
-                return format.Un18.getName();
+                return TEXFile.PixelFormat.Un18.getName();
             default:
                 return "未知";
         }
@@ -242,8 +237,8 @@ public class LoadTexActivity extends BaseActivity
 
     /**
      * tex type
-     * @param type
-     * @return
+     * @param type  图片类型
+     * @return      图片类型
      */
     public String typeString(TEXFile.TextureType type){
         switch(type){
@@ -262,7 +257,7 @@ public class LoadTexActivity extends BaseActivity
 
     /**
      * 隐藏toolbar动画
-     * @param flag
+     * @param flag  标记
      */
     private void toolbarAnimal(int flag) {
         if(mAnimator != null && mAnimator.isRunning()){
@@ -273,14 +268,14 @@ public class LoadTexActivity extends BaseActivity
 //            full(false);
             try{
                 Thread.sleep(90);
-            }catch (InterruptedException e){}
+            }catch (InterruptedException ignored){}
             mAnimator = ObjectAnimator.ofFloat(binding.openTexToolbar, "translationY", binding.openTexToolbar.getTranslationY(), 0);
             //mAnimator.setDuration(500);
         }else{
 //            full(true);
             try{
                 Thread.sleep(60);
-            }catch (InterruptedException e){}
+            }catch (InterruptedException ignored){}
             mAnimator = ObjectAnimator.ofFloat(binding.openTexToolbar,"translationY",binding.openTexToolbar.getTranslationY(),-binding.openTexToolbar.getHeight());
             //mAnimator.setDuration(500);
         }
@@ -289,7 +284,7 @@ public class LoadTexActivity extends BaseActivity
 
     /**
      * 填充
-     * @param enable
+     * @param enable    是否显示
      */
     private void full(boolean enable) {
         if (enable) {
@@ -360,12 +355,12 @@ public class LoadTexActivity extends BaseActivity
      */
     private void saveDXTFile(TEXFile.PixelFormat pixelFormat){
         //
-        SaveTexFileCallback save = new SaveTexFileCallback(this, pixelFormat, TEXFile.TextureType.OneD);
+        SaveTexFileTask save = new SaveTexFileTask(this, texPath, pixelFormat, TEXFile.TextureType.OneD);
         save.setGenerateMipmaps(true);
         save.setPreMultiplyAlpha(true);
         save.setTexImage(texImage);
-
-        save.execute(texPath, pixelFormat.getName());
+        ///====
+        CThreadPool.getInstance().executeAsynchronousTask(save);
     }
 
     @Override

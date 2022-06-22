@@ -15,7 +15,7 @@ import android.provider.DocumentsContract;
 import android.net.Uri;
 
 import com.cc.fileManage.R;
-import com.cc.fileManage.file.DFileMethod;
+import com.cc.fileManage.entity.file.DFileMethod;
 import com.cc.fileManage.utils.CharUtil;
 
 import java.io.FileNotFoundException;

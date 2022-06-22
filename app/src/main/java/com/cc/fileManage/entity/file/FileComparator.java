@@ -1,9 +1,7 @@
-package com.cc.fileManage.file;
+package com.cc.fileManage.entity.file;
 
 import java.io.File;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Collections;
 
 public class FileComparator<T> implements Comparator<T>
 {

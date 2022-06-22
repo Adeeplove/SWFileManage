@@ -1,4 +1,4 @@
-package com.cc.fileManage.task;
+package com.cc.fileManage.task.fileBrowser;
 
 import android.app.AlertDialog;
 
@@ -8,9 +8,10 @@ import android.content.Context;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.blankj.utilcode.util.FileUtils;
-import com.cc.fileManage.file.DFileMethod;
-import com.cc.fileManage.file.JFile;
-import com.cc.fileManage.file.ManageFile;
+import com.cc.fileManage.entity.file.DFileMethod;
+import com.cc.fileManage.entity.file.JFile;
+import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.task.AsynchronousTask;
 
 public class FileBrowserDeleteTask extends AsynchronousTask<String, String>
 {

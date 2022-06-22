@@ -1,28 +1,31 @@
-package com.cc.fileManage.callback;
+package com.cc.fileManage.task.tex;
 
 import android.app.ProgressDialog;
-import android.os.AsyncTask;
-import android.widget.Toast;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.entity.TEXFile;
 import com.cc.fileManage.module.TEXCreator;
+import com.cc.fileManage.task.AsynchronousTask;
 
-public class SaveTexFileCallback extends AsyncTask<String, String, String>
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+
+public class SaveTexFileTask extends AsynchronousTask<String, String>
 {
-    private Context context;
+    private final WeakReference<Context> weakReference;
     //保存的图片
     private Bitmap texImage;
+    private final String texPath;     //路径
     //格式
-    private TEXFile.PixelFormat PixelFormat;
+    private final TEXFile.PixelFormat pixelFormat;
     //类型
-    private TEXFile.TextureType TextureType;
+    private final TEXFile.TextureType textureType;
 
-    private boolean GenerateMipmaps;
+    private boolean generateMipmaps;
 
     private boolean preMultiplyAlpha;
 
@@ -35,7 +38,7 @@ public class SaveTexFileCallback extends AsyncTask<String, String, String>
 
     public void setGenerateMipmaps(boolean generateMipmaps)
     {
-        GenerateMipmaps = generateMipmaps;
+        this.generateMipmaps = generateMipmaps;
     }
 
     public void setPreMultiplyAlpha(boolean preMultiplyAlpha)
@@ -43,15 +46,19 @@ public class SaveTexFileCallback extends AsyncTask<String, String, String>
         this.preMultiplyAlpha = preMultiplyAlpha;
     }
 
-    public SaveTexFileCallback(Context context, TEXFile.PixelFormat format, TEXFile.TextureType type){
-        this.context = context;
-        this.PixelFormat = format;
-        this.TextureType = type;
+    public SaveTexFileTask(Context context, String texPath, TEXFile.PixelFormat format, TEXFile.TextureType type){
+        this.weakReference = new WeakReference<>(context);
+        this.texPath = texPath;
+        this.pixelFormat = format;
+        this.textureType = type;
     }
 
     @Override
     protected void onPreExecute()
     {
+        Context context = weakReference.get();
+        if(context == null) return;
+        ////
         dialog = new ProgressDialog(context);
         dialog.setMessage("正在保存...");
         dialog.setCancelable(false);
@@ -60,18 +67,16 @@ public class SaveTexFileCallback extends AsyncTask<String, String, String>
 
     @Override
     protected void onProgressUpdate(String[] values) {
-        Toast.makeText(context, values[0], Toast.LENGTH_SHORT).show();
+        ToastUtils.showShort(values[0]);
     }
 
     @Override
-    protected String doInBackground(String[] format)
+    protected String doInBackground()
     {
         FileOutputStream fo = null;
-        try
-        {
+        try {
             //文件
-            File file = new File(format[0]);
-
+            File file = new File(texPath);
             if(!file.exists()){
                 publishProgress("文件不存在!");
                 return null;
@@ -81,25 +86,21 @@ public class SaveTexFileCallback extends AsyncTask<String, String, String>
                 name = name.substring(0, name.lastIndexOf("."));
             }
 
-            String outFile = file.getParent() + "/" + name + "_" + format[1] +".tex";
+            String outFile = file.getParent() + "/" + name + "_" + pixelFormat.getName() +".tex";
             fo = new FileOutputStream(outFile);
 
-            TEXCreator tc = new TEXCreator(PixelFormat, TextureType);
-            tc.setGenerateMipmaps(GenerateMipmaps);
+            TEXCreator tc = new TEXCreator(pixelFormat, textureType);
+            tc.setGenerateMipmaps(generateMipmaps);
             tc.setPreMultiplyAlpha(preMultiplyAlpha);
 
             //error
             tc.ConvertPNGToTex(texImage, fo);
 
             return "ok";
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             publishProgress(e.getLocalizedMessage());
-        }
-        finally{
-            try
-            {
+        } finally{
+            try {
                 if(fo != null)
                     fo.close();
             }
@@ -113,12 +114,7 @@ public class SaveTexFileCallback extends AsyncTask<String, String, String>
     {
         if(dialog != null)
             dialog.dismiss();
-        if(result == null){
-            Toast.makeText(context, "保存失败!", Toast.LENGTH_SHORT).show();
-        }
-        else{
-            Toast.makeText(context, "已保存", Toast.LENGTH_SHORT).show();
-        }
+        ToastUtils.showShort(result == null ? "保存失败!" : "已保存");
     }
 
     @Override

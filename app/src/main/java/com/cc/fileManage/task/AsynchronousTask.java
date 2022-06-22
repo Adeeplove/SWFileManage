@@ -7,7 +7,7 @@ import android.os.Message;
 import androidx.annotation.NonNull;
 
 /**
- * 轻量级的异步线程任务类 替代AsyncTask使用
+ * 异步线程任务类 替代AsyncTask使用
  * 只能在主线程使用
  *
  * 2022年6月21日15:47:34
@@ -17,11 +17,12 @@ import androidx.annotation.NonNull;
 public abstract class AsynchronousTask<T,M> implements Runnable{
 
     private final Handler handler = new Handler(Looper.getMainLooper()){
+        @SuppressWarnings({"unchecked", "cast"})
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             try {
-                M m = (M)msg.obj;
+                M[] m = (M[])msg.obj;
                 onProgressUpdate(m);
             }catch (Exception e){
                 onError(e);
@@ -51,7 +52,7 @@ public abstract class AsynchronousTask<T,M> implements Runnable{
     public void run() {
         this.runThread = true;
         try {
-            handler.post(this::onPreExecute);
+//            handler.post(this::onPreExecute);
             T value = doInBackground();
             handler.post(() -> {
                 if(isCancel()) {
@@ -87,6 +88,7 @@ public abstract class AsynchronousTask<T,M> implements Runnable{
     /**
      * 执行在主线程
      */
+    @SuppressWarnings({"unchecked", "varargs"})
     protected void onProgressUpdate(M... msg){}
 
     /**
