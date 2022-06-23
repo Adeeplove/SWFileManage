@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.ref.WeakReference;
 
-public class ConvertTexTask extends AsynchronousTask<Boolean, String> {
+public class ConvertTexTask extends AsynchronousTask<String, String, Boolean> {
 
     private final WeakReference<Context> weakReference;
 
@@ -65,7 +65,7 @@ public class ConvertTexTask extends AsynchronousTask<Boolean, String> {
     }
 
     @Override
-    protected Boolean doInBackground() {
+    protected Boolean doInBackground(String... strings) {
         Bitmap bitmap = null;
         if(file.getName().endsWith(".tex")){
             TEXFile tex = TexFileUtil.openTexFile(file);

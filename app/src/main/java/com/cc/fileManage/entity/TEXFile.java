@@ -23,7 +23,7 @@ public class TEXFile
         PS3(10),
         Unknown(0);
 
-        private int num;
+        private final int num;
         Platform(int num){
             this.num = num;
         }
@@ -48,8 +48,8 @@ public class TEXFile
         ARGB(4, "ARGB"), RGB(5, "RGB"), Un18(18, "?"),
         Unknown(7, "Unknown");
 
-        private int num;
-        private String name;
+        private final int num;
+        private final String name;
 
         PixelFormat(int num, String name){
             this.num = num;
@@ -81,8 +81,8 @@ public class TEXFile
         ThreeD("3D",3),
         CubeMap("立方映射",4);
 
-        private int num;
-        private String des;
+        private final int num;
+        private final String des;
         TextureType(String des, int num){
             this.des = des;
             this.num = num;

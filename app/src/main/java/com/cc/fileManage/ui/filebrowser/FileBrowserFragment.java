@@ -35,7 +35,6 @@ import com.cc.fileManage.entity.file.DFileMethod;
 import com.cc.fileManage.entity.file.JFile;
 import com.cc.fileManage.entity.file.ManageFile;
 import com.cc.fileManage.module.FileMethod;
-import com.cc.fileManage.task.CThreadPool;
 import com.cc.fileManage.task.fileBrowser.FileBrowserDeleteTask;
 import com.cc.fileManage.task.fileBrowser.FileBrowserLoadTask;
 import com.cc.fileManage.ui.BaseFragment;
@@ -266,7 +265,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
     public void updateFileData(final String path, String showItem, final boolean flash, final boolean scrollToTop)
     {
         ///=======================
-        CThreadPool.getInstance().stopAsynchronousTask(loadFiles);
+        if(loadFiles != null) loadFiles.cancel(true);
         //
         loadFiles = new FileBrowserLoadTask(requireContext());
         loadFiles.setCanReadSystemPath(flash);
@@ -325,7 +324,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
             public void onFailure(Exception e) {
             }
         });
-        CThreadPool.getInstance().executeAsynchronousTask(loadFiles);
+        loadFiles.execute();
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -429,7 +428,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
                 setCheckItem(false);
                 updateFileData();
             });
-            CThreadPool.getInstance().executeAsynchronousTask(delete);
+            delete.execute();
         });
         ad.setNegativeButton("取消",null);
         ad.show();
@@ -538,7 +537,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
                                 }
                             });
                             //执行
-                            CThreadPool.getInstance().executeAsynchronousTask(convertTexCallback);
+                            convertTexCallback.execute();
                         });
                         convertTexDialog.show();
                     }

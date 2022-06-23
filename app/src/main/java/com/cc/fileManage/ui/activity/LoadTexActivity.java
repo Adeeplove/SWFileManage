@@ -17,7 +17,6 @@ import com.cc.fileManage.R;
 import com.cc.fileManage.databinding.ActicityTexBinding;
 import com.cc.fileManage.entity.TEXFile;
 import com.cc.fileManage.entity.file.ManageFile;
-import com.cc.fileManage.task.CThreadPool;
 import com.cc.fileManage.task.tex.LoadTexFileTask;
 import com.cc.fileManage.task.tex.SaveTexFileTask;
 import com.cc.fileManage.utils.CommonUtil;
@@ -150,7 +149,7 @@ public class LoadTexActivity extends BaseActivity
                 //
                 binding.openTexImage.setScaleType(PinchImageView.ScaleType.FIT_CENTER);
             });
-            CThreadPool.getInstance().executeAsynchronousTask(load);
+            load.execute();
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -355,12 +354,12 @@ public class LoadTexActivity extends BaseActivity
      */
     private void saveDXTFile(TEXFile.PixelFormat pixelFormat){
         //
-        SaveTexFileTask save = new SaveTexFileTask(this, texPath, pixelFormat, TEXFile.TextureType.OneD);
+        SaveTexFileTask save = new SaveTexFileTask(this, pixelFormat, TEXFile.TextureType.OneD);
         save.setGenerateMipmaps(true);
         save.setPreMultiplyAlpha(true);
         save.setTexImage(texImage);
         ///====
-        CThreadPool.getInstance().executeAsynchronousTask(save);
+        save.execute(texPath);
     }
 
     @Override

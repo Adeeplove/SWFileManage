@@ -13,7 +13,7 @@ import com.cc.fileManage.entity.file.JFile;
 import com.cc.fileManage.entity.file.ManageFile;
 import com.cc.fileManage.task.AsynchronousTask;
 
-public class FileBrowserDeleteTask extends AsynchronousTask<String, String>
+public class FileBrowserDeleteTask extends AsynchronousTask<String, String, String>
 {
     private final WeakReference<Context> weakReference;
 
@@ -46,7 +46,7 @@ public class FileBrowserDeleteTask extends AsynchronousTask<String, String>
 
     //执行后台任务（耗时操作）,不可在此方法内修改UI
     @Override
-    protected String doInBackground() {
+    protected String doInBackground(String... strings) {
         try{
             for(ManageFile file : data){
                 Context context = weakReference.get();

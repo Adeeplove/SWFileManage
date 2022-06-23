@@ -20,7 +20,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-public class TranslationTask extends AsynchronousTask<String,Integer>
+public class TranslationTask extends AsynchronousTask<String, Integer, String>
 {
     private final WeakReference<Context> weakReference;
     private ProgressDialog dialog;
@@ -44,7 +44,7 @@ public class TranslationTask extends AsynchronousTask<String,Integer>
     }
 
     @Override
-    protected String doInBackground()
+    protected String doInBackground(String... strings)
     {
         return tranText(handlerString(text));
     }

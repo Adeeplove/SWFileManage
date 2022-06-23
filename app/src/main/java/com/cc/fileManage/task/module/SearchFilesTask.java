@@ -2,7 +2,6 @@ package com.cc.fileManage.task.module;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +15,7 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.R;
 import com.cc.fileManage.entity.file.JFile;
 import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.task.AsynchronousTask;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,7 +26,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchFilesTask extends AsyncTask<String, String, String>
+public class SearchFilesTask extends AsynchronousTask<String, String, String>
 {
     private final WeakReference<Context> weakReference;
 
@@ -227,7 +227,7 @@ public class SearchFilesTask extends AsyncTask<String, String, String>
 
         if (file.isFile())
         {
-            if(isCancelled()){
+            if(isCancel()){
                 return;
             }
             //判断
@@ -236,7 +236,7 @@ public class SearchFilesTask extends AsyncTask<String, String, String>
         //文件夹
         else if (file.isDirectory())
         {
-            if(isCancelled()){
+            if(isCancel()){
                 return;
             }
             //所有子文件
@@ -245,7 +245,7 @@ public class SearchFilesTask extends AsyncTask<String, String, String>
             if (files != null && files.length > 0) {
                 for (File child : files) {
                     if(child.isDirectory()){
-                        if(isCancelled()){
+                        if(isCancel()){
                             return;
                         }
                         //是否搜索子目录
@@ -255,7 +255,7 @@ public class SearchFilesTask extends AsyncTask<String, String, String>
                     }
                     else if(child.isFile())
                     {
-                        if(isCancelled()){
+                        if(isCancel()){
                             return;
                         }
                         //判断是否匹配

@@ -14,12 +14,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
-public class SaveTexFileTask extends AsynchronousTask<String, String>
+public class SaveTexFileTask extends AsynchronousTask<String, String, String>
 {
     private final WeakReference<Context> weakReference;
     //保存的图片
     private Bitmap texImage;
-    private final String texPath;     //路径
     //格式
     private final TEXFile.PixelFormat pixelFormat;
     //类型
@@ -46,9 +45,8 @@ public class SaveTexFileTask extends AsynchronousTask<String, String>
         this.preMultiplyAlpha = preMultiplyAlpha;
     }
 
-    public SaveTexFileTask(Context context, String texPath, TEXFile.PixelFormat format, TEXFile.TextureType type){
+    public SaveTexFileTask(Context context, TEXFile.PixelFormat format, TEXFile.TextureType type){
         this.weakReference = new WeakReference<>(context);
-        this.texPath = texPath;
         this.pixelFormat = format;
         this.textureType = type;
     }
@@ -71,12 +69,12 @@ public class SaveTexFileTask extends AsynchronousTask<String, String>
     }
 
     @Override
-    protected String doInBackground()
+    protected String doInBackground(String... strings)
     {
         FileOutputStream fo = null;
         try {
             //文件
-            File file = new File(texPath);
+            File file = new File(strings[0]);
             if(!file.exists()){
                 publishProgress("文件不存在!");
                 return null;

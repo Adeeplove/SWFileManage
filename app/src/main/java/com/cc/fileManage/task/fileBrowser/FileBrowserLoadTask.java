@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FileBrowserLoadTask extends AsynchronousTask<List<ManageFile>,String> {
+public class FileBrowserLoadTask extends AsynchronousTask<String, String, List<ManageFile>> {
 
     private final WeakReference<Context> weakReference;
     ///
@@ -98,7 +98,7 @@ public class FileBrowserLoadTask extends AsynchronousTask<List<ManageFile>,Strin
     }
 
     @Override
-    protected List<ManageFile> doInBackground() {
+    protected List<ManageFile> doInBackground(String... strings) {
         //数据区
         List<ManageFile> data = new ArrayList<>();
         //不是根目录 则添加返回上一级item

@@ -15,7 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 
-public class LoadTexFileTask extends AsynchronousTask<Bitmap, String>
+public class LoadTexFileTask extends AsynchronousTask<String, String, Bitmap>
 {
     private final WeakReference<Context> weakReference;
 
@@ -54,7 +54,7 @@ public class LoadTexFileTask extends AsynchronousTask<Bitmap, String>
     }
 
     @Override
-    protected Bitmap doInBackground()
+    protected Bitmap doInBackground(String... strings)
     {
         try{
             return openTexFile(inputFile);

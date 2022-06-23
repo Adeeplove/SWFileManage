@@ -6,15 +6,28 @@ import android.os.Message;
 
 import androidx.annotation.NonNull;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 /**
  * 异步线程任务类 替代AsyncTask使用
  * 只能在主线程使用
  *
  * 2022年6月21日15:47:34
  * @author sowhat
- * @param <T>
  */
-public abstract class AsynchronousTask<T,M> implements Runnable{
+public abstract class AsynchronousTask<Parameter,News,Result> implements Runnable{
+
+    ///线程池
+    private static final ExecutorService  executor;
+
+    static {
+        executor = new ThreadPoolExecutor(1, 5,
+                60L, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(10));
+    }
 
     private final Handler handler = new Handler(Looper.getMainLooper()){
         @SuppressWarnings({"unchecked", "cast"})
@@ -22,7 +35,7 @@ public abstract class AsynchronousTask<T,M> implements Runnable{
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             try {
-                M[] m = (M[])msg.obj;
+                News[] m = (News[])msg.obj;
                 onProgressUpdate(m);
             }catch (Exception e){
                 onError(e);
@@ -30,13 +43,16 @@ public abstract class AsynchronousTask<T,M> implements Runnable{
         }
     };
 
+    //线程状态
     private boolean cancel, runThread;
+    //参数
+    private Parameter[] parameter;
 
     public boolean isCancel() {
         return cancel;
     }
 
-    public void setCancel(boolean cancel) {
+    public void cancel(boolean cancel) {
         this.cancel = cancel;
     }
 
@@ -51,19 +67,22 @@ public abstract class AsynchronousTask<T,M> implements Runnable{
     @Override
     public void run() {
         this.runThread = true;
+        Result value = null;
         try {
-//            handler.post(this::onPreExecute);
-            T value = doInBackground();
-            handler.post(() -> {
-                if(isCancel()) {
-                    onCancelled();
-                }else {
-                    onPostExecute(value);
-                }
-            });
+            value = doInBackground(parameter);
         } catch (Exception e){
             handler.post(() -> onError(e));
         } finally {
+            Result finalValue = value;
+            handler.post(() -> {
+                try {
+                    if(isCancel()) {
+                        onCancelled();
+                    }else {
+                        onPostExecute(finalValue);
+                    }
+                }catch (Exception e){onError(e);}
+            });
             this.runThread = false;
         }
     }
@@ -76,10 +95,11 @@ public abstract class AsynchronousTask<T,M> implements Runnable{
     /**
      * 执行在子线程
      */
-    protected abstract T doInBackground();
+    @SuppressWarnings({"unchecked", "varargs"})
+    protected abstract Result doInBackground(Parameter... parameters);
 
     @SafeVarargs
-    protected final void publishProgress(M... msg) {
+    protected final void publishProgress(News... msg) {
         Message message = Message.obtain();
         message.obj = msg;
         handler.sendMessage(message);
@@ -89,12 +109,12 @@ public abstract class AsynchronousTask<T,M> implements Runnable{
      * 执行在主线程
      */
     @SuppressWarnings({"unchecked", "varargs"})
-    protected void onProgressUpdate(M... msg){}
+    protected void onProgressUpdate(News... msg){}
 
     /**
      * 执行在主线程
      */
-    protected void onPostExecute(T value){}
+    protected void onPostExecute(Result result){}
 
     /**
      * 执行在主线程
@@ -105,4 +125,15 @@ public abstract class AsynchronousTask<T,M> implements Runnable{
      * 执行在主线程
      */
     protected void onError(Exception e){}
+
+    /**
+     * 执行线程
+     */
+    @SafeVarargs
+    public final void execute(Parameter... parameters) {
+        ///=======================
+        onPreExecute();
+        this.parameter = parameters;
+        executor.submit(this);
+    }
 }
