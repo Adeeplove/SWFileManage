@@ -29,16 +29,24 @@ public abstract class AsynchronousTask<Parameter,News,Result> implements Runnabl
                 new ArrayBlockingQueue<>(10));
     }
 
+    private static final int MESSAGE = 1;      //消息
+    private static final int RESULT = 2;       //任务结果
     private final Handler handler = new Handler(Looper.getMainLooper()){
-        @SuppressWarnings({"unchecked", "cast"})
+        @SuppressWarnings({"unchecked"})
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
-            try {
+            if(msg.what == MESSAGE) {
                 News[] m = (News[])msg.obj;
                 onProgressUpdate(m);
-            }catch (Exception e){
-                onError(e);
+            }
+            else if(msg.what == RESULT) {
+                this.removeCallbacksAndMessages(null);
+                if(isCancelled()) {
+                    onCancelled();
+                }else {
+                    onPostExecute((Result)msg.obj);
+                }
             }
         }
     };
@@ -48,7 +56,7 @@ public abstract class AsynchronousTask<Parameter,News,Result> implements Runnabl
     //参数
     private Parameter[] parameter;
 
-    public boolean isCancel() {
+    public boolean isCancelled() {
         return cancel;
     }
 
@@ -67,64 +75,60 @@ public abstract class AsynchronousTask<Parameter,News,Result> implements Runnabl
     @Override
     public void run() {
         this.runThread = true;
-        Result value = null;
         try {
-            value = doInBackground(parameter);
-        } catch (Exception e){
-            handler.post(() -> onError(e));
+            Result value = doInBackground(parameter);
+            ///发送消息
+            postMessage(RESULT, value);
         } finally {
-            Result finalValue = value;
-            handler.post(() -> {
-                try {
-                    if(isCancel()) {
-                        onCancelled();
-                    }else {
-                        onPostExecute(finalValue);
-                    }
-                }catch (Exception e){onError(e);}
-            });
             this.runThread = false;
         }
     }
 
     /**
-     * 执行在主线程
+     * 执行前的准备任务
      */
     protected void onPreExecute() {}
 
     /**
-     * 执行在子线程
+     * 热任务线程(子线程处理)
      */
     @SuppressWarnings({"unchecked", "varargs"})
     protected abstract Result doInBackground(Parameter... parameters);
 
+    /**
+     * 消息处理
+     * @param msg   接收的消息
+     */
     @SafeVarargs
     protected final void publishProgress(News... msg) {
-        Message message = Message.obtain();
-        message.obj = msg;
-        handler.sendMessage(message);
+        postMessage(MESSAGE, msg);
     }
 
     /**
-     * 执行在主线程
+     * 更新信息
      */
     @SuppressWarnings({"unchecked", "varargs"})
     protected void onProgressUpdate(News... msg){}
 
     /**
-     * 执行在主线程
+     * 任务执行结束 返回结果
      */
     protected void onPostExecute(Result result){}
 
     /**
-     * 执行在主线程
+     * 任务取消
      */
     protected void onCancelled(){}
 
     /**
-     * 执行在主线程
+     * 提交消息
      */
-    protected void onError(Exception e){}
+    private void postMessage(int what, Object msg) {
+        Message message = Message.obtain();
+        message.what = what;
+        message.obj = msg;
+        handler.sendMessage(message);
+    }
 
     /**
      * 执行线程
@@ -132,6 +136,7 @@ public abstract class AsynchronousTask<Parameter,News,Result> implements Runnabl
     @SafeVarargs
     public final void execute(Parameter... parameters) {
         ///=======================
+        cancel(false);
         onPreExecute();
         this.parameter = parameters;
         executor.submit(this);

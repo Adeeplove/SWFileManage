@@ -227,37 +227,28 @@ public class SearchFilesTask extends AsynchronousTask<String, String, String>
 
         if (file.isFile())
         {
-            if(isCancel()){
-                return;
-            }
+            if(isCancelled()) return;
             //判断
             fileIsMatch(search, file);
         }
         //文件夹
         else if (file.isDirectory())
         {
-            if(isCancel()){
-                return;
-            }
+            if(isCancelled()) return;
             //所有子文件
             File[] files = file.listFiles();
             //不为Null
             if (files != null && files.length > 0) {
                 for (File child : files) {
                     if(child.isDirectory()){
-                        if(isCancel()){
-                            return;
-                        }
+                        if(isCancelled()) return;
                         //是否搜索子目录
                         if(searchSubdirectory){
                             filePattern(child, search);
                         }
                     }
-                    else if(child.isFile())
-                    {
-                        if(isCancel()){
-                            return;
-                        }
+                    else if(child.isFile()) {
+                        if(isCancelled()) return;
                         //判断是否匹配
                         fileIsMatch(search, child);
                     }

@@ -322,6 +322,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
 
             @Override
             public void onFailure(Exception e) {
+
             }
         });
         loadFiles.execute();

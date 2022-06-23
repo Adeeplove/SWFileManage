@@ -101,43 +101,42 @@ public class FileBrowserLoadTask extends AsynchronousTask<String, String, List<M
     protected List<ManageFile> doInBackground(String... strings) {
         //数据区
         List<ManageFile> data = new ArrayList<>();
-        //不是根目录 则添加返回上一级item
-        if (!path.equals("/")) {
-            if (DFileMethod.isParentCanRead(path) || canReadSystemPath) {
-                ManageFile manageFile = new JFile();
-                manageFile.setTag(true);
-                data.add(manageFile);
+        try {
+            //不是根目录 则添加返回上一级item
+            if (!path.equals("/")) {
+                if (DFileMethod.isParentCanRead(path) || canReadSystemPath) {
+                    ManageFile manageFile = new JFile();
+                    manageFile.setTag(true);
+                    data.add(manageFile);
+                }
             }
-        }
-        //实例化文件对象
-        File file = new File(path);
-        //获取不到说明没有权限访问
-        if(file.exists()) {
-            if (file.canRead()) {
-                //
-                fileList(file, data);
-            } else if(DFileMethod.isAndroidDataDir(file)){
-                //document file
-                documentList(file, data);
-            } else {
-                publishProgress("2", "访问受限");
+            //实例化文件对象
+            File file = new File(path);
+            //获取不到说明没有权限访问
+            if(file.exists()) {
+                if (file.canRead()) {
+                    //
+                    fileList(file, data);
+                } else if(DFileMethod.isAndroidDataDir(file)){
+                    //document file
+                    documentList(file, data);
+                } else {
+                    publishProgress("2", "访问受限");
+                }
+            }else {
+                publishProgress("2", "不存在的路径");
             }
-        }else {
-            publishProgress("2", "不存在的路径");
+            ///========直接退出==============
+            if(isCancelled()) return null;
+            //排序
+            Collections.sort(data, new FileComparator<>());
+            //高亮
+            highlight(data);
+        }catch (Exception e) {
+            //更新数据
+            onLoadFilesListener.onFailure(e);
         }
-        ///========直接退出==============
-        if(isCancel()) return null;
-        //排序
-        Collections.sort(data, new FileComparator<>());
-        //高亮
-        highlight(data);
         return data;
-    }
-
-    @Override
-    protected void onError(Exception e) {
-        //更新数据
-        onLoadFilesListener.onFailure(e);
     }
 
     @Override
@@ -191,7 +190,7 @@ public class FileBrowserLoadTask extends AsynchronousTask<String, String, List<M
         File[] lists = file.listFiles();
         if(lists != null) {
             for(File f : lists){
-                if(isCancel())return;     //退出
+                if(isCancelled())return;     //退出
                 ///
                 if (!isShowHideFile && f.isHidden()) continue;
                 //添加
@@ -218,7 +217,7 @@ public class FileBrowserLoadTask extends AsynchronousTask<String, String, List<M
             //
             Cursor cursor = null;
             try {
-                if(isCancel())return;     //退出
+                if(isCancelled())return;     //退出
                 //拿到子路径
                 Uri childrenUri = DocumentsContract
                         .buildChildDocumentsUriUsingTree(uri, DocumentsContract.getDocumentId(uri));
@@ -230,7 +229,7 @@ public class FileBrowserLoadTask extends AsynchronousTask<String, String, List<M
 
                 //迭代
                 while (cursor.moveToNext()) {
-                    if(isCancel())return;     //退出
+                    if(isCancelled())return;     //退出
                     //是否是隐藏文件
                     if (!isShowHideFile) {
                         if (cursor.getString(0).startsWith("."))
