@@ -1,6 +1,6 @@
 package com.cc.fileManage.ui.views;
 
-import android.app.Activity;
+import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
@@ -12,19 +12,21 @@ import androidx.appcompat.app.AlertDialog;
 import com.blankj.utilcode.util.ClipboardUtils;
 import com.cc.fileManage.R;
 
+import java.lang.ref.WeakReference;
+
 /**
  * 重命名文件视图类
  * @time 2021/08/21
  */
 public class RenameFileView {
-    private final Activity context;
+    private final WeakReference<Context> weakReference;
 
     private boolean isShowPaste;
     //
     private OnRenameFileListener onRenameFileListener;
 
-    public RenameFileView(Activity context) {
-        this.context = context;
+    public RenameFileView(Context context) {
+        this.weakReference = new WeakReference<>(context);
     }
 
     public void setOnRenameFileListener(OnRenameFileListener onRenameFileListener) {
@@ -40,7 +42,9 @@ public class RenameFileView {
      * @param title title
      */
     public void rename(String title, String message, String successStr){
-        View view = context.getLayoutInflater().inflate(R.layout.file_rename,null);
+        Context context = weakReference.get();
+        if(context == null) return;
+        View view = View.inflate(context, R.layout.file_rename,null);
         //设置输入框
         final EditText name = view.findViewById(R.id.rename_edit);
         TextView textViewTitle = view.findViewById(R.id.rename_title);

@@ -76,9 +76,7 @@ public abstract class AsynchronousTask<Parameter,News,Result> implements Runnabl
     public void run() {
         this.runThread = true;
         try {
-            Result value = doInBackground(parameter);
-            ///发送消息
-            postMessage(RESULT, value);
+            sendMessage(RESULT, doInBackground(parameter));
         } finally {
             this.runThread = false;
         }
@@ -101,7 +99,7 @@ public abstract class AsynchronousTask<Parameter,News,Result> implements Runnabl
      */
     @SafeVarargs
     protected final void publishProgress(News... msg) {
-        postMessage(MESSAGE, msg);
+        sendMessage(MESSAGE, msg);
     }
 
     /**
@@ -123,7 +121,7 @@ public abstract class AsynchronousTask<Parameter,News,Result> implements Runnabl
     /**
      * 提交消息
      */
-    private void postMessage(int what, Object msg) {
+    private void sendMessage(int what, Object msg) {
         Message message = Message.obtain();
         message.what = what;
         message.obj = msg;

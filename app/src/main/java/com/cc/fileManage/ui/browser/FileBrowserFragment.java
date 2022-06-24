@@ -1,4 +1,4 @@
-package com.cc.fileManage.ui.filebrowser;
+package com.cc.fileManage.ui.browser;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -28,8 +29,6 @@ import com.blankj.utilcode.util.PathUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.R;
 import com.cc.fileManage._static.FileMethodType;
-import com.cc.fileManage.task.tex.ConvertTexTask;
-import com.cc.fileManage.task.module.SearchFilesTask;
 import com.cc.fileManage.databinding.FragmentFileBrowserBinding;
 import com.cc.fileManage.entity.file.DFileMethod;
 import com.cc.fileManage.entity.file.JFile;
@@ -37,6 +36,8 @@ import com.cc.fileManage.entity.file.ManageFile;
 import com.cc.fileManage.module.FileMethod;
 import com.cc.fileManage.task.fileBrowser.FileBrowserDeleteTask;
 import com.cc.fileManage.task.fileBrowser.FileBrowserLoadTask;
+import com.cc.fileManage.task.module.SearchFilesTask;
+import com.cc.fileManage.task.tex.ConvertTexTask;
 import com.cc.fileManage.ui.BaseFragment;
 import com.cc.fileManage.ui.adapter.FileBrowserAdapter;
 import com.cc.fileManage.ui.adapter.SearchListAdapter;
@@ -122,6 +123,19 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
             updateFileData(file.getParent()+File.separator);
         else
             updateFileData(file.getPath());
+    }
+
+    @Override
+    public boolean onCreateMenu(Menu menu) {
+        menu.add(Menu.NONE,1000, 0,"查找");
+        menu.add(Menu.NONE,2000, 0,"转换");
+        menu.add(Menu.NONE,3000, 0,"书签");
+        return true;
+    }
+
+    @Override
+    public boolean onMenuItemSelected(MenuItem item) {
+        return false;
     }
 
     /**
@@ -321,9 +335,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
             }
 
             @Override
-            public void onFailure(Exception e) {
-
-            }
+            public void onFailure(Exception e) {}
         });
         loadFiles.execute();
     }
@@ -371,7 +383,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
      * 修改当前文件的文件名
      */
     public void renameFile(ManageFile file){
-        RenameFileView renameFileView = new RenameFileView(getActivity());
+        RenameFileView renameFileView = new RenameFileView(requireContext());
         renameFileView.setOnRenameFileListener((newName, dialog) -> {
             //
             if(CharUtil.isValidFileName(newName)){

@@ -22,18 +22,6 @@ public abstract class BaseFragment extends Fragment implements MainActivity.OnEv
     @Override
     public abstract void onUpdate(String path);
 
-    //线程状态
-    protected boolean isRunningTask(AsyncTask<?,?,?> task){
-        return task != null && task.getStatus() == AsyncTask.Status.RUNNING;
-    }
-
-    //取消线程
-    protected void destroyTask(AsyncTask<?,?,?> task){
-        if(task != null && task.getStatus() == AsyncTask.Status.RUNNING){
-            task.cancel(true);
-        }
-    }
-
     /**
      *
      * @return MainActivity

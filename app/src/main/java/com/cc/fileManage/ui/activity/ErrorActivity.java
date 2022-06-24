@@ -3,11 +3,8 @@ package com.cc.fileManage.ui.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.cc.fileManage.MainActivity;
 import com.cc.fileManage._static.AppManager;

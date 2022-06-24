@@ -9,7 +9,9 @@ import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
@@ -36,9 +38,7 @@ public class MainActivity extends BaseActivity {
     private NavController navController;
     private DrawerLayout drawerLayout;
 
-    //文件浏览器fragment
-//    private FileBrowserFragment fileBrowserFragment;
-
+    ///============
     private ActivityMainBinding binding;
 
     @Override
@@ -81,6 +81,7 @@ public class MainActivity extends BaseActivity {
      * 跳转至文件浏览器fragment
      */
     private void startTo(){
+        System.out.println("startTo: "+getIntent().getData());
         navController.navigate(R.id.nav_home);
     }
 
@@ -105,21 +106,6 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     * 获取当前使用的fragment
-     */
-//    public void setFileBrowserFragment(Class<?> clazz) {
-//        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().getFragments().get(0);
-//        List<Fragment> fragmentList = navHostFragment.getChildFragmentManager().getFragments();
-//        //
-//        for (Fragment fragment : fragmentList) {
-//            if(fragment.getClass().isAssignableFrom(clazz)){
-//                fileBrowserFragment = (FileBrowserFragment) fragment;
-//                break;
-//            }
-//        }
-//    }
-
-    /**
      * 设置subtitle文本内容
      * @param text  文本内容
      */
@@ -127,11 +113,28 @@ public class MainActivity extends BaseActivity {
         binding.appBarMain.toolbarSubtitle.setText(text);
     }
 
+    @SuppressLint("RtlHardcoded")
+    public void openDrawer() {
+        if(drawerLayout.isDrawerOpen(Gravity.LEFT))
+            drawerLayout.closeDrawer(Gravity.LEFT);
+        else
+            drawerLayout.openDrawer(Gravity.LEFT);
+    }
+
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        menu.clear();
+        if(onEventChangeListener != null)
+            return onEventChangeListener.onCreateMenu(menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(onEventChangeListener != null)
+            return onEventChangeListener.onMenuItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -259,5 +262,7 @@ public class MainActivity extends BaseActivity {
     public interface OnEventChangeListener{
         void onBack();
         void onUpdate(String path);
+        boolean onCreateMenu(Menu menu);
+        boolean onMenuItemSelected(MenuItem item);
     }
 }
