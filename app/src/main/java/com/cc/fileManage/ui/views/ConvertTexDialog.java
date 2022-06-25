@@ -1,6 +1,6 @@
 package com.cc.fileManage.ui.views;
 
-import android.app.Dialog;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
@@ -9,6 +9,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 
 import com.cc.fileManage.R;
 import com.cc.fileManage.entity.TEXFile;
@@ -18,7 +19,7 @@ import org.angmarch.views.NiceSpinner;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConvertTexDialog extends Dialog implements View.OnClickListener{
+public class ConvertTexDialog extends AlertDialog implements View.OnClickListener{
 
     //图片格式
     private NiceSpinner niceFormatSpinner;
@@ -102,6 +103,7 @@ public class ConvertTexDialog extends Dialog implements View.OnClickListener{
         this.typeSpinnerData.add(TEXFile.TextureType.CubeMap.getDes());
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
         switch (v.getId()){

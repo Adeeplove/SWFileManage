@@ -8,10 +8,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ResolveInfo;
+import android.graphics.Color;
+import android.graphics.drawable.ClipDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,6 +28,8 @@ import androidx.appcompat.app.AlertDialog;
 import com.blankj.utilcode.util.ClipboardUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.App;
+import com.cc.fileManage.R;
+import com.cc.fileManage._static.CSetting;
 import com.cc.fileManage.databinding.FragmentBrowserBinding;
 import com.cc.fileManage.db.DBService;
 import com.cc.fileManage.entity.BookMark;
@@ -44,6 +50,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 简单的浏览器页面实现
+ */
 public class BrowserFragment extends BaseFragment implements View.OnClickListener{
 
     private FragmentBrowserBinding binding;
@@ -72,6 +81,8 @@ public class BrowserFragment extends BaseFragment implements View.OnClickListene
         super.onResume();
         //=============
         getMainActivity().setSubtitleText(App.browserType);
+        if(getMainActivity().getSupportActionBar() != null)
+            getMainActivity().getSupportActionBar().setTitle(R.string.browser_name);
     }
 
     /**
@@ -82,6 +93,10 @@ public class BrowserFragment extends BaseFragment implements View.OnClickListene
         monitorDownload();
         //初始化配置
         initWebViewSettings();
+        //
+        @SuppressLint("RtlHardcoded")
+        ClipDrawable d = new ClipDrawable(new ColorDrawable(Color.BLUE), Gravity.LEFT, ClipDrawable.HORIZONTAL);
+        binding.browserBar.setProgressDrawable(d);
         //加载URL
         binding.browserWeb.loadUrl(loadUrl);
         binding.browserWeb.setWebViewClient(new WebViewClient() {
@@ -115,7 +130,6 @@ public class BrowserFragment extends BaseFragment implements View.OnClickListene
             @Override
             public void onReceivedTitle(WebView view, String title) {}
         });
-
         //下载
         binding.browserWeb.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) -> {
             RenameFileView renameFileView = new RenameFileView(requireContext());
@@ -149,9 +163,9 @@ public class BrowserFragment extends BaseFragment implements View.OnClickListene
         binding.browserRefresh.setOnLongClickListener(v -> {
             AlertDialog.Builder dialog = new AlertDialog.Builder(requireContext());
             dialog.setTitle("当前访问的链接");
-            dialog.setMessage(loadUrl);
+            dialog.setMessage(binding.browserWeb.getUrl());
             dialog.setPositiveButton("复制", (dialog1, which) -> {
-                ClipboardUtils.copyText(loadUrl);
+                ClipboardUtils.copyText(binding.browserWeb.getUrl());
                 ToastUtils.showShort("已复制");
             });
             dialog.setNegativeButton("取消", (DialogInterface.OnClickListener) null);
@@ -192,6 +206,8 @@ public class BrowserFragment extends BaseFragment implements View.OnClickListene
         menu.add(Menu.NONE,2000, 0,"查看书签");
         menu.add(Menu.NONE,3000, 0,"添加书签");
         menu.add(Menu.NONE,4000, 0,"浏览器打开");
+        menu.add(Menu.NONE,5000, 0,"设为应用首页")
+                .setCheckable(true).setChecked(CSetting.webIsHome);
         return true;
     }
 
@@ -222,8 +238,8 @@ public class BrowserFragment extends BaseFragment implements View.OnClickListene
                 addBookMark.setOnRenameFileListener((newName, dialog) -> {
                     if(dialog != null) dialog.dismiss();
                     BookMark bookMark = new BookMark(BookMark.Type.Web);
-                    bookMark.setName(TextUtils.isEmpty(newName) ? loadUrl : newName);
-                    bookMark.setPath(loadUrl);
+                    bookMark.setName(TextUtils.isEmpty(newName) ? binding.browserWeb.getUrl() : newName);
+                    bookMark.setPath(binding.browserWeb.getUrl());
                     if(DBService.getInstance(requireContext()).addBookMark(bookMark)){
                         ToastUtils.showShort("添加成功");
                     }else {
@@ -231,16 +247,21 @@ public class BrowserFragment extends BaseFragment implements View.OnClickListene
                     }
                 });
                 addBookMark.setShowPaste(true);
-                addBookMark.rename("添加书签", loadUrl, "添加");
+                addBookMark.rename("添加书签", binding.browserWeb.getUrl(), "添加");
                 return true;
             case 4000:              //浏览器内打开
                 try{
-                    Uri uri = Uri.parse(loadUrl);
+                    Uri uri = Uri.parse(binding.browserWeb.getUrl());
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     startActivity(intent);
                 }catch(Exception e){
                     e.printStackTrace();
                 }
+                return true;
+            case 5000:
+                CSetting.webIsHome = !item.isChecked();
+                CSetting.writeSettingNow(requireContext());
+                ToastUtils.showShort("设置成功");
                 return true;
             default:
                 return false;
@@ -281,7 +302,7 @@ public class BrowserFragment extends BaseFragment implements View.OnClickListene
                             }
                         });
                         addBookMark.setShowPaste(true);
-                        addBookMark.rename("重命名书签", loadUrl, "重命名");
+                        addBookMark.rename("重命名书签", bookMark.getName(), "重命名");
                     }
                 }
                 @Override
@@ -420,9 +441,9 @@ public class BrowserFragment extends BaseFragment implements View.OnClickListene
                 decode = decode.trim();
             }
             //
-            return TextUtils.isEmpty(decode) ? "下载文件" : decode;
+            return TextUtils.isEmpty(decode) ? "文件" : decode;
         }catch (Exception e){
-            return "文件名称";
+            return "文件";
         }
     }
 

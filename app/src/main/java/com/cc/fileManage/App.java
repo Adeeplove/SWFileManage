@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.blankj.utilcode.util.PathUtils;
+import com.cc.fileManage._static.CSetting;
 import com.cc.fileManage.db.DBService;
 import com.cc.fileManage.ui.activity.ErrorActivity;
 import com.tencent.smtt.export.external.TbsCoreSettings;
@@ -32,6 +33,8 @@ public class App extends Application {
         super.onCreate();
         //初始化数据库
         DBService.getInstance(getApplicationContext());
+        //初始化配置文件
+        CSetting.init(getApplicationContext());
         //腾讯tbs浏览内核
         initTbs();
         //log存放路径

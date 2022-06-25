@@ -9,7 +9,7 @@
         android:id="@+id/browser_bar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="2dp"/>
 
     <com.tencent.smtt.sdk.WebView
         android:layout_weight="1"
@@ -21,7 +21,7 @@
         android:id="@+id/item_layout"
         android:layout_width="match_parent"
         android:clickable="false"
-        android:layout_height="50dp"
+        android:layout_height="35dp"
         android:background="@color/white">
 
         <ImageView

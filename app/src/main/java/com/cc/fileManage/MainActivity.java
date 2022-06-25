@@ -20,6 +20,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.blankj.utilcode.util.ToastUtils;
+import com.cc.fileManage._static.CSetting;
 import com.cc.fileManage.databinding.ActivityMainBinding;
 import com.cc.fileManage.ui.activity.BaseActivity;
 import com.cc.fileManage.ui.views.RenameFileView;
@@ -80,9 +81,8 @@ public class MainActivity extends BaseActivity {
     /**
      * 跳转至文件浏览器fragment
      */
-    private void startTo(){
-        System.out.println("startTo: "+getIntent().getData());
-        navController.navigate(R.id.nav_home);
+    private void initStartTo(){
+        navController.navigate(CSetting.webIsHome ? R.id.nav_browser : R.id.nav_home);
     }
 
     /**
@@ -167,7 +167,7 @@ public class MainActivity extends BaseActivity {
         //
         if (requestCode == XXPermissions.REQUEST_CODE) {
             if (XXPermissions.isGranted(this, Permission.MANAGE_EXTERNAL_STORAGE)) {
-                startTo();  //跳转
+                initStartTo();  //跳转
             }else {
                 showDialog();
             }
@@ -191,7 +191,7 @@ public class MainActivity extends BaseActivity {
     private void requestAccess(){
         //android 11申请存储权限
         if(XXPermissions.isGranted(this, Permission.MANAGE_EXTERNAL_STORAGE)){
-            startTo();
+            initStartTo();
         }else {
             XXPermissions.with(this)
                     .permission(Permission.MANAGE_EXTERNAL_STORAGE)
@@ -199,7 +199,7 @@ public class MainActivity extends BaseActivity {
                         @Override
                         public void onGranted(List<String> permissions, boolean all) {
                             if(all) {
-                                startTo();
+                                initStartTo();
                             }else {
                                 showDialog();
                             }

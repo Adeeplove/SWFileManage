@@ -9,8 +9,7 @@ public class AppManager {
     private static Stack<Activity> activityStack;
     private static AppManager instance;
 
-    public AppManager() {
-    }
+    public AppManager() {}
 
     public static AppManager getAppManager() {
         if (instance == null) {
