@@ -13,7 +13,7 @@ import com.cc.fileManage.R;
 public class ProgressDialogUtil {
     /**
      * 弹出耗时对话框
-     * @param context
+     * @param context   上下文
      */
     public static AlertDialog showProgressDialog(Context context)
     {
@@ -27,24 +27,20 @@ public class ProgressDialogUtil {
         return mAlertDialog;
     }
 
-    public static void showDialog(Context context, String title, String meaasge){
+    public static void showDialog(Context context, String title, String message){
         AlertDialog dialog = new AlertDialog.Builder(context).create();
         dialog.getWindow().setDimAmount(0f);
         dialog.setTitle(title);
-        dialog.setMessage(meaasge);
-        dialog.setButton(AlertDialog.BUTTON_POSITIVE,"确定", new DialogInterface.OnClickListener(){
-            @Override
-            public void onClick(DialogInterface p1, int p2) {
-            }
+        dialog.setMessage(message);
+        dialog.setButton(AlertDialog.BUTTON_POSITIVE,"确定", (p1, p2) -> {
         });
         dialog.show();
     }
 
-    public static AlertDialog.Builder showDialogAndExit(Context context, String title, String meaasge){
+    public static AlertDialog.Builder showDialogAndExit(Context context, String title, String message){
         AlertDialog.Builder dialog = new AlertDialog.Builder(context);
         dialog.setTitle(title);
-        dialog.setMessage(meaasge);
-
+        dialog.setMessage(message);
         return dialog;
     }
 }

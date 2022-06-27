@@ -216,7 +216,7 @@ public class BrowserFragment extends BaseFragment implements View.OnClickListene
         switch(item.getItemId()){
             case android.R.id.home:
                 getMainActivity().openDrawer();
-                return true;
+                break;
             case 1000:
                 RenameFileView renameFileView = new RenameFileView(requireContext());
                 renameFileView.setOnRenameFileListener((newName, dialog) -> {
@@ -229,10 +229,10 @@ public class BrowserFragment extends BaseFragment implements View.OnClickListene
                 });
                 renameFileView.setShowPaste(true);
                 renameFileView.rename("加载链接", loadUrl, "加载");
-                return true;
+                break;
             case 2000:
                 showBookMark();     //显示书签
-                return true;
+                break;
             case 3000:
                 RenameFileView addBookMark = new RenameFileView(requireContext());
                 addBookMark.setOnRenameFileListener((newName, dialog) -> {
@@ -248,7 +248,7 @@ public class BrowserFragment extends BaseFragment implements View.OnClickListene
                 });
                 addBookMark.setShowPaste(true);
                 addBookMark.rename("添加书签", binding.browserWeb.getUrl(), "添加");
-                return true;
+                break;
             case 4000:              //浏览器内打开
                 try{
                     Uri uri = Uri.parse(binding.browserWeb.getUrl());
@@ -257,15 +257,14 @@ public class BrowserFragment extends BaseFragment implements View.OnClickListene
                 }catch(Exception e){
                     e.printStackTrace();
                 }
-                return true;
+                break;
             case 5000:
                 CSetting.webIsHome = !item.isChecked();
                 CSetting.writeSettingNow(requireContext());
-                ToastUtils.showShort("设置成功");
-                return true;
-            default:
-                return false;
+                ToastUtils.showShort(CSetting.webIsHome ? "已设为首页" : "已取消首页");
+                break;
         }
+        return true;
     }
 
     /**

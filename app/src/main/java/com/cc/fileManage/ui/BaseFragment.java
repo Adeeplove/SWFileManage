@@ -1,9 +1,12 @@
 package com.cc.fileManage.ui;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.cc.fileManage.MainActivity;
@@ -28,5 +31,20 @@ public abstract class BaseFragment extends Fragment implements MainActivity.OnEv
      */
     protected MainActivity getMainActivity() {
         return ((MainActivity)getActivity());
+    }
+
+    private AlertDialog dialog;
+    protected void showMessage( String title, String msg) {
+        dismiss();
+        dialog = new AlertDialog.Builder(requireContext()).create();
+        dialog.setTitle(title);
+        dialog.setMessage(msg);
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "确定", (DialogInterface.OnClickListener) null);
+        dialog.show();
+    }
+
+    protected void dismiss() {
+        if(dialog != null)
+            dialog.dismiss();
     }
 }

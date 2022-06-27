@@ -79,7 +79,7 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
             //设置点击监听
             holder.parent.setOnLongClickListener(p1 -> {
                 if(onItemClickListener != null)
-                    onItemClickListener.onItemLongClick(holder.parent, file);
+                    onItemClickListener.onItemLongClick(file, index);
                 return true;
             });
 
@@ -133,13 +133,9 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
                 notifyItemChanged(position);
                 return;
             }
-            //选中
-            manageFile.setCheck(true);
+            //
+            onItemClickListener.onCheckItem(manageFile, position);
         }
-        //更新item
-        notifyItemChanged(position);
-        //
-        onItemClickListener.onCheckItem();
     }
 
     //holder
@@ -264,7 +260,7 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
 
     public interface OnItemClickListener{
         void onItemClick(ManageFile file, int index);
-        void onItemLongClick(View item, ManageFile file);
-        void onCheckItem();
+        void onItemLongClick(ManageFile file, int index);
+        void onCheckItem(ManageFile file, int index);
     }
 }

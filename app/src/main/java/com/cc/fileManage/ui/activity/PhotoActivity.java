@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MenuItem;
@@ -13,15 +14,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.boycy815.pinchimageview.PinchImageView;
+import com.cc.fileManage.R;
 import com.cc.fileManage.databinding.ActicityPhotoBinding;
+import com.cc.fileManage.entity.file.DFileMethod;
+import com.davemorrissey.labs.subscaleview.ImageSource;
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -49,10 +55,9 @@ public class PhotoActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()){
-            case android.R.id.home:
-                finish();
-                return true;
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -82,11 +87,11 @@ public class PhotoActivity extends AppCompatActivity {
         setToolbarTitle("图片查看器("+(index+1)+"/"+images.size()+")");
         File f = new File(images.get(index));
         try{
-            Bitmap bm = BitmapFactory.decodeFile(images.get(index));
-            if(bm != null){
-                setToolbarSubTitle(f.getName()+"("+bm.getWidth() +" * "+bm.getHeight()+")");
-            }else{
+            BitmapFactory.Options bitmapWH = getBitmapWH(f);
+            if(bitmapWH.outHeight < 1 || bitmapWH.outWidth < 1) {
                 setToolbarSubTitle(f.getName()+" 图片损坏!");
+            }else {
+                setToolbarSubTitle(f.getName()+"("+bitmapWH.outWidth +" * "+bitmapWH.outHeight+")");
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -96,33 +101,23 @@ public class PhotoActivity extends AppCompatActivity {
         binding.imageOpenViewpage.setAdapter(new CPageAdapter());
         binding.imageOpenViewpage.setOffscreenPageLimit(2);
         binding.imageOpenViewpage.setCurrentItem(index);
-        binding.imageOpenViewpage.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        binding.imageOpenViewpage.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener(){
             @Override
             public void onPageSelected(int position) {
+                super.onPageSelected(position);
                 setToolbarTitle("图片查看器("+(position+1)+"/"+images.size()+")");
                 File file = new File(images.get(position));
                 try{
-                    Bitmap bm = BitmapFactory.decodeFile(images.get(position));
-                    if(bm != null){
-                        setToolbarSubTitle(file.getName()+"("+bm.getWidth() +" * "+bm.getHeight()+")");
-                    }else{
-                        setToolbarSubTitle(file.getName()+" 图片损坏!");
+                    BitmapFactory.Options bitmapWH = getBitmapWH(f);
+                    if(bitmapWH.outHeight < 1 || bitmapWH.outWidth < 1) {
+                        setToolbarSubTitle(f.getName()+" 图片损坏!");
+                    }else {
+                        setToolbarSubTitle(f.getName()+"("+bitmapWH.outWidth +" * "+bitmapWH.outHeight+")");
                     }
                 }catch(Exception e){
                     e.printStackTrace();
                     setToolbarSubTitle(file.getName()+" 图片损坏!");
                 }
-            }
-
-            @Override
-            public void onPageScrolled(int position, float positionOffset,
-                                       int positionOffsetPixels) {
-                // 页面正在滑动时间回调
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-                // 当pageView 状态发生改变的时候，回调
             }
         });
         //全屏
@@ -138,44 +133,45 @@ public class PhotoActivity extends AppCompatActivity {
         }
 
         @Override
-        public boolean isViewFromObject(View arg0, Object arg1) {
+        public boolean isViewFromObject(@NonNull View arg0, @NonNull Object arg1) {
             // TODO Auto-generated method stub
             return arg0 == arg1;
         }
 
         //设置ViewPager指定位置要显示的view
+        @NonNull
         @Override
-        public Object instantiateItem(ViewGroup container, int position){
-            PinchImageView im=new PinchImageView(PhotoActivity.this);
+        public Object instantiateItem(@NonNull ViewGroup container, int position){
+//            PinchImageView im = new PinchImageView(PhotoActivity.this);
+            SubsamplingScaleImageView im = new SubsamplingScaleImageView(PhotoActivity.this);
             try{
-                Bitmap bm = BitmapFactory.decodeFile(images.get(position));
+                File file = new File(images.get(position));
+                ///
+                Bitmap bm = getRealBitmap(file);
                 if(bm != null){
-                    im.setImageBitmap(bm);
+                    im.setImage(ImageSource.bitmap(bm));
                 }else{
-//                    im.setImageResource(R.drawable.oil);
+                    im.setImage(ImageSource.resource(R.drawable.ic_oil));
                 }
             }catch(Exception e){
                 e.printStackTrace();
-//                im.setImageResource(R.drawable.oil);
+                im.setImage(ImageSource.resource(R.drawable.ic_oil));
             }
             ///点击隐藏显示
-            im.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View p1){
-                    if(show){
-                        toolbarAnimal(1);//隐藏toolBar
-                        show = false;
-                    }else{
-                        toolbarAnimal(0);//显示toolBar
-                        show = true;
-                    }
+            im.setOnClickListener(p1 -> {
+                if(show){
+                    toolbarAnimal(1);//隐藏toolBar
+                    show = false;
+                }else{
+                    toolbarAnimal(0);//显示toolBar
+                    show = true;
                 }
             });
             container.addView(im);
             return im;
         }
         @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
+        public void destroyItem(ViewGroup container, int position, @NonNull Object object) {
             // 销毁对应位置上的Object
             container.removeView((View) object);
         }
@@ -183,7 +179,7 @@ public class PhotoActivity extends AppCompatActivity {
 
     /**
      * 隐藏toolbar动画
-     * @param flag
+     * @param flag  标记
      */
     private void toolbarAnimal(int flag) {
         if(mAnimator != null && mAnimator.isRunning()){
@@ -230,6 +226,56 @@ public class PhotoActivity extends AppCompatActivity {
 
     private void setToolbarSubTitle(final String mes){
         handler.post(() -> binding.imageOpenToolbar.setSubtitle(mes));
+    }
+
+    /**
+     * 获取图片信息 不加载至内存
+     * @param f 图片文件
+     * @return  图片信息
+     */
+    private BitmapFactory.Options getBitmapWH(File f) {
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        try {
+            //设置为true,代表加载器不加载图片,而是把图片的宽高读出来
+            opts.inJustDecodeBounds=true;
+            if(f.canRead()) {
+                BitmapFactory.decodeFile(images.get(index), opts);
+            }else if(DFileMethod.isAndroidDataDir(f)) {
+                Uri uri = DFileMethod.getDocumentUri(f.getPath());
+                if(uri != null) {
+                    InputStream inputStream = getContentResolver().openInputStream(uri);
+                    if(inputStream != null)
+                        BitmapFactory.decodeStream(inputStream, null, opts);
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return opts;
+    }
+
+    /**
+     * 加载图片
+     * @param f 图片文件
+     * @return  图片
+     */
+    private Bitmap getRealBitmap(File f) {
+        Bitmap bm = null;
+        try {
+            if(f.canRead()) {
+                bm = BitmapFactory.decodeFile(images.get(index));
+            }else if(DFileMethod.isAndroidDataDir(f)) {
+                Uri uri = DFileMethod.getDocumentUri(f.getPath());
+                if(uri != null) {
+                    InputStream inputStream = getContentResolver().openInputStream(uri);
+                    if(inputStream != null)
+                        bm = BitmapFactory.decodeStream(inputStream);
+                }
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bm;
     }
 
     @Override

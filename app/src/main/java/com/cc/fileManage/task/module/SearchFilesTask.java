@@ -26,18 +26,19 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchFilesTask extends AsynchronousTask<String, String, String>
+public class SearchFilesTask<T extends ManageFile> extends AsynchronousTask<String, String, String>
 {
     private final WeakReference<Context> weakReference;
 
     //搜索的文件数据
-    private final List<ManageFile> fileData;
+    private final List<T> fileData;
     //搜索到的内容
     private final List<File> searchData;
 
     ///================
     private boolean searchSubdirectory = true;   //搜索子目录
     private boolean caseSensitive = false;       //区分大小写
+    private final boolean searchHiddenFile;      //搜索隐藏文件
     private String  searchContent;               //搜索的文件名称
     private String  subContent;                  //搜索的文本内容
 
@@ -59,10 +60,11 @@ public class SearchFilesTask extends AsynchronousTask<String, String, String>
         this.onSearchDataListener = onSearchDataListener;
     }
 
-    public SearchFilesTask(Context context, List<ManageFile> fileData){
+    public SearchFilesTask(Context context, List<T> fileData, boolean searchHiddenFile){
         this.weakReference = new WeakReference<>(context);
         this.fileData = fileData;
         this.searchData = new ArrayList<>();
+        this.searchHiddenFile = searchHiddenFile;
     }
 
     @Override
@@ -75,9 +77,9 @@ public class SearchFilesTask extends AsynchronousTask<String, String, String>
     @Override
     protected String doInBackground(String... strings) {
         //搜索的文件夹
-        for(ManageFile manageFile : fileData){
+        for(T manageFile : fileData){
             try{
-                System.out.println(searchContent+"<>搜索: "+manageFile.toString());
+                if(manageFile.isTag()) continue;
                 //搜索
                 if(manageFile instanceof JFile)
                     filePattern(((JFile) manageFile).getFile(), searchContent);
@@ -263,10 +265,12 @@ public class SearchFilesTask extends AsynchronousTask<String, String, String>
      * @param file   文件
      */
     private void fileIsMatch(String search, File file){
+        if(!searchHiddenFile && file.isHidden()) return;
         //区分大小写
         if(caseSensitive){
+            System.out.println("file: "+file.getPath());
             //判断是否匹配
-            if (!file.isHidden() && wildcardMatch(search, file.getName())) {
+            if (wildcardMatch(search, file.getName())) {
                 if(subContent != null){
                     if(isHaveContent(file))
                         searchData.add(file);
@@ -278,7 +282,7 @@ public class SearchFilesTask extends AsynchronousTask<String, String, String>
         }
         else{
             //判断是否匹配
-            if (file.isHidden() && wildcardMatch(search.toLowerCase(), file.getName().toLowerCase())) {
+            if (wildcardMatch(search.toLowerCase(), file.getName().toLowerCase())) {
                 if(subContent != null){
                     if(isHaveContent(file))
                         searchData.add(file);

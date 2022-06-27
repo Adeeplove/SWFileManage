@@ -1,6 +1,5 @@
 package com.cc.fileManage.ui.activity;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -8,8 +7,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
+import com.blankj.utilcode.util.FileUtils;
 import com.cc.fileManage.databinding.ActivityEditBinding;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.Objects;
 
 public class EditActivity extends BaseActivity {
@@ -28,27 +31,20 @@ public class EditActivity extends BaseActivity {
         setContentView(binding.getRoot());
 
         //返回键
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        
+        if(getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         //文件路径
         this.filePath = getIntent().getStringExtra("path");
-        if(filePath != null) {
-//            StringBuilder content = CFileUtils.readFile(filePath, "UTF-8");
-//            binding.editor.setText(content.toString());
-        }
+        if(filePath != null)
+            binding.editor.setText(readFileContent(filePath));
     }
 
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
-            case android.R.id.home:
-                //退出提示
-//                if(binding.codeEditor.isChange())
-//                    saveDialog();
-//                else
-//                    finish();
-//                break;
+        if (item.getItemId() == android.R.id.home) {
+            finish();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -57,7 +53,7 @@ public class EditActivity extends BaseActivity {
      * 保存文件
      * @param isExit    是否退出
      */
-    private void saveFile(final boolean isExit){
+    private void saveFile(boolean isExit){
     }
 
     /**
@@ -71,5 +67,24 @@ public class EditActivity extends BaseActivity {
         dialog.setNegativeButton("保存", (dialog12, which) -> saveFile(false));
         dialog.setNeutralButton("退出", (dialog1, which) -> finish());
         dialog.show();
+    }
+
+    /**
+     * 读取文件内容
+     * @param filePath  文件路径
+     * @return          文件内容
+     */
+    private String readFileContent(String filePath) {
+        StringBuilder stringBuffer = new StringBuilder();
+        File f = new File(filePath);
+        try (BufferedReader fileReader = new BufferedReader(new FileReader(f))) {
+            String line;
+            while ((line = fileReader.readLine()) != null) {
+                stringBuffer.append(line).append("\n");
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return stringBuffer.toString();
     }
 }

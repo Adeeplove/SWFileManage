@@ -20,6 +20,7 @@ public class WelcomeFragment extends BaseFragment {
 
     @Override
     public boolean onCreateMenu(Menu menu) {
+        menu.add(Menu.NONE,1000, 0,"Menu");
         return true;
     }
 

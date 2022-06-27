@@ -53,10 +53,11 @@ dependencies {
 
     // Editor
     implementation project(path: ':editor')
+    // 图片
+    implementation 'com.davemorrissey.labs:subsampling-scale-image-view-androidx:3.10.0'
     // if u use AndroidX, use the following
     implementation 'com.blankj:utilcodex:1.30.6'
     // 权限请求框架：https://github.com/getActivity/XXPermissions
     implementation 'com.github.getActivity:XXPermissions:13.5'
-
     implementation 'com.github.arcadefire:nice-spinner:1.4.4'
 }

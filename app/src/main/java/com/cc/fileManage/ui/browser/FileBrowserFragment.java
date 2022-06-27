@@ -2,9 +2,8 @@ package com.cc.fileManage.ui.browser;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.DocumentsContract;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,42 +13,42 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.PathUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.R;
+import com.cc.fileManage._static.CSetting;
 import com.cc.fileManage._static.FileMethodType;
 import com.cc.fileManage.databinding.FragmentFileBrowserBinding;
+import com.cc.fileManage.db.DBService;
+import com.cc.fileManage.entity.BookMark;
 import com.cc.fileManage.entity.file.DFileMethod;
 import com.cc.fileManage.entity.file.JFile;
 import com.cc.fileManage.entity.file.ManageFile;
-import com.cc.fileManage.module.FileMethod;
-import com.cc.fileManage.task.fileBrowser.FileBrowserDeleteTask;
+import com.cc.fileManage.module.FileOperations;
 import com.cc.fileManage.task.fileBrowser.FileBrowserLoadTask;
 import com.cc.fileManage.task.module.SearchFilesTask;
-import com.cc.fileManage.task.tex.ConvertTexTask;
 import com.cc.fileManage.ui.BaseFragment;
+import com.cc.fileManage.ui.adapter.BookMarkAdapter;
 import com.cc.fileManage.ui.adapter.FileBrowserAdapter;
 import com.cc.fileManage.ui.adapter.SearchListAdapter;
 import com.cc.fileManage.ui.callback.FileItemTouchHelperCallback;
-import com.cc.fileManage.ui.views.ConvertTexDialog;
 import com.cc.fileManage.ui.views.CreateFileView;
+import com.cc.fileManage.ui.views.ListItemDialog;
 import com.cc.fileManage.ui.views.RenameFileView;
 import com.cc.fileManage.utils.CharUtil;
 import com.cc.fileManage.utils.RPermissionUtil;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,6 +68,10 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
     private int checkFileNum;                       //选中的文件数量
 
     private int openFileIndex = -1;                 //打开的文件下标
+
+    private boolean pasteState;                     //等待粘贴
+    private boolean copyOrMove;                     //复制/粘贴
+    private List<ManageFile> waitCopyFile;          //等待复制/粘贴的文件
 
     private FileBrowserAdapter adapter;             //列表数据适配器
 
@@ -106,9 +109,9 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
     @Override
     public void onBack() {
         if(isParentCanRead()) {
-            backParent();
+            backParent();   //返回上一级
         }else {
-            getMainActivity().exit();
+            getMainActivity().exit();   //双击退出
         }
     }
 
@@ -127,15 +130,58 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
 
     @Override
     public boolean onCreateMenu(Menu menu) {
-        menu.add(Menu.NONE,1000, 0,"查找");
-        menu.add(Menu.NONE,2000, 0,"转换");
-        menu.add(Menu.NONE,3000, 0,"书签");
+        menu.add(Menu.NONE,1000, 0,"文件查找");
+        menu.add(Menu.NONE,2000, 0,"书签列表");
+        menu.add(Menu.NONE,3000, 0,"添加书签");
+        menu.add(Menu.NONE,4000, 0,"隐藏文件").
+                setCheckable(true).setChecked(CSetting.showHiddenFile);
         return true;
     }
 
     @Override
     public boolean onMenuItemSelected(MenuItem item) {
-        return false;
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                getMainActivity().openDrawer();
+                break;
+            case 1000:
+                //show
+                List<JFile> files = new ArrayList<>();
+                files.add(new JFile(getReadFilePath()));
+                ///===============
+                SearchFilesTask<JFile> searchFilesCallback = new SearchFilesTask<>(getActivity(),
+                        files, CSetting.showHiddenFile);
+                searchFilesCallback.setOnSearchDataListener(this::showDataView);
+                searchFilesCallback.showSearchView("*.*");
+                break;
+            case 2000:
+                showBookMark();     //书签列表
+                break;
+            case 3000:              //添加书签
+                RenameFileView addBookMark = new RenameFileView(requireContext());
+                addBookMark.setOnRenameFileListener((newName, dialog) -> {
+                    if(dialog != null) dialog.dismiss();
+                    BookMark bookMark = new BookMark(BookMark.Type.Path);
+                    bookMark.setName(TextUtils.isEmpty(newName) ? getReadFilePath() : newName);
+                    bookMark.setPath(getReadFilePath());
+                    if(DBService.getInstance(requireContext()).addBookMark(bookMark)){
+                        ToastUtils.showShort("添加成功");
+                    }else {
+                        ToastUtils.showShort("添加失败");
+                    }
+                });
+                addBookMark.setShowPaste(true);
+                addBookMark.rename("添加书签", getReadFilePath(), "添加");
+                break;
+            case 4000:
+                CSetting.showHiddenFile = !item.isChecked();
+                CSetting.writeSettingNow(requireContext());
+                ToastUtils.showShort(CSetting.showHiddenFile ? "显示.开头的隐藏文件" : "不显示.开头的隐藏文件");
+                updateFileData();
+                break;
+
+        }
+        return true;
     }
 
     /**
@@ -147,6 +193,8 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
         //读取路径
         setReadFilePath(PathUtils.getExternalStoragePath() + File.separator);
 
+        //粘贴按钮
+        binding.fileButton.setVisibility(pasteState ? View.VISIBLE : View.GONE);
         //设置列表属性
         binding.fileRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.fileRecyclerView.setHasFixedSize(true);
@@ -210,9 +258,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
                 setFilesCheckState(false);
                 changeButtonState();
             }else{
-                if(isCheckItem()){
-                    return;
-                }
+                if(isCheckItem()) return;
                 CreateFileView cfv = new CreateFileView(getActivity(), getReadFilePath());
                 cfv.setOnCreateFileListener(name ->
                         updateFileData(getReadFilePath(), name, false, false));
@@ -226,10 +272,10 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
                 setFilesCheckState(true);
             }else{
                 //刷新
-                if(isCheckItem()){
-                    return;
-                }
+                if(isCheckItem()) return;
                 updateFileData();
+                //取消粘贴状态
+                setPasteState(false, false,"", null);
             }
         });
         binding.fileCancel.setOnClickListener(v -> {
@@ -242,6 +288,20 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
                 //返回上一级
                 backParent();
             }
+        });
+        //复制粘贴
+        binding.fileButton.setOnClickListener(v -> {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(requireContext());
+            alertDialog.setTitle(copyOrMove ? "移动" : "复制");
+            alertDialog.setMessage("是否确定粘贴文件?");
+            alertDialog.setPositiveButton("确定", (dialog, which) -> {
+                setPasteState(false, false, "", null);
+                if(!copyOrMove) {
+                    //复制
+                }
+            });
+            alertDialog.setNegativeButton("取消", null);
+            alertDialog.show();
         });
     }
 
@@ -283,7 +343,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
         //
         loadFiles = new FileBrowserLoadTask(requireContext());
         loadFiles.setCanReadSystemPath(flash);
-        loadFiles.setIsShowHideFile(true);
+        loadFiles.setIsShowHideFile(CSetting.showHiddenFile);
 
         loadFiles.setPath(path);
         loadFiles.setShowItem(showItem);
@@ -296,7 +356,6 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
                 setReadFilePath(path);
                 //更新访问的路径
                 getMainActivity().setSubtitleText(path);
-
                 //设置数据
                 if(flash){
                     //设置RecyclerView动画
@@ -317,7 +376,6 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
                     //移动到上次记录的位置
                     scrollToPosition();
                 }
-
                 //没有选择文件
                 setCheckItem(false);
                 setCheckFileNum(0);
@@ -333,7 +391,6 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
                 RPermissionUtil rPermissionUtil = new RPermissionUtil();
                 rPermissionUtil.askDataPathPermission(getActivity(), dir);
             }
-
             @Override
             public void onFailure(Exception e) {}
         });
@@ -358,19 +415,21 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
                     file.setCheck(true);
                     checkFileNum++;
                 }
-                adapter.notifyDataSetChanged();
+                adapter.notifyItemChanged(index);
                 changeButtonState();
                 return;
             }
 
             //文件处理
             if(file.isFile()){
+                //复制粘贴粘贴 直接返回
+                if(pasteState) return;
                 //
-                if(file instanceof JFile){
-                    FileMethod fileMethod = new FileMethod(getContext(), file.getFilePath());
-                    if(fileMethod.openFile()){
-                        this.openFileIndex = index;
-                    }
+                FileOperations fileMethod = new FileOperations(this, file, index);
+                if(!fileMethod.openFile()) {
+                    fileMethod.showOperationsView();
+                }else {
+                    this.openFileIndex = index;
                 }
             }else{
                 //首位
@@ -379,72 +438,12 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
         }
     }
 
-    /**
-     * 修改当前文件的文件名
-     */
-    public void renameFile(ManageFile file){
-        RenameFileView renameFileView = new RenameFileView(requireContext());
-        renameFileView.setOnRenameFileListener((newName, dialog) -> {
-            //
-            if(CharUtil.isValidFileName(newName)){
-                File f = new File(getReadFilePath() + newName);
-                if(f.exists()){
-                    ToastUtils.showShort("文件已存在!");
-                    return;
-                }
-                if(file instanceof JFile){
-                    boolean re = ((JFile) file).getFile().renameTo(f);
-                    if(re){
-                        updateFileData(getReadFilePath(), newName, true, false);
-                    }else{
-                        ToastUtils.showShort("重命名失败!");
-                    }
-                } else {
-                    //
-                    DocumentFile du = DFileMethod.getDocumentFile(getContext(), file.getFilePath());
-                    try {
-                        Uri uri = DocumentsContract.renameDocument(requireContext()
-                                .getContentResolver(), du.getUri(), newName);
-                        if(uri != null){
-                            updateFileData(getReadFilePath(), newName, true, false);
-                        }else{
-                            ToastUtils.showShort("重命名失败!");
-                        }
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                }
-                dialog.dismiss();
-            }else{
-                ToastUtils.showShort("名称包含特殊字符!");
-            }
-        });
-        renameFileView.rename("重命名", file.getFileName(), "确定");
-    }
-
-    /**
-     * 删除文件
-     * @param data 文件集合
-     */
-    private void deleteFiles(final List<ManageFile> data){
-        AlertDialog.Builder ad = new AlertDialog.Builder(requireContext());
-        ad.setTitle("删除");
-        if(data.size() > 1){
-            ad.setMessage("是否删除选择的"+data.size()+"个文件?");
-        }else {
-            ad.setMessage("是否删除 " + data.get(0).getFileName() + "?");
-        }
-        ad.setPositiveButton("删除", (p1, p2) -> {
-            FileBrowserDeleteTask delete = new FileBrowserDeleteTask(requireContext(), data);
-            delete.setOnDeleteListener(() -> {
-                setCheckFileNum(0);
-                setCheckItem(false);
-                updateFileData();
-            });
-            delete.execute();
-        });
-        ad.setNegativeButton("取消",null);
-        ad.show();
+    @Override
+    public void onItemLongClick(ManageFile file, int index) {
+        if(file.isTag() || pasteState) return;
+        ////
+        FileOperations fileMethod = new FileOperations(this, file, index);
+        fileMethod.showLongOperationsView();
     }
 
     /**
@@ -488,81 +487,15 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
     }
 
     @Override
-    public void onItemLongClick(View item, ManageFile file) {
-        if(file.isTag())return;
-        PopupMenu popupMenu = new PopupMenu(getContext(), item);
-        Menu me = popupMenu.getMenu();
-        //重命名
-        me.add(Menu.NONE,100, 0,"重命名");
-        //删除文件
-        me.add(Menu.NONE,200, 0,"删除文件");
-        //文件查找
-        me.add(Menu.NONE,300, 0,"文件查找");
-        //TEX转换
-        me.add(Menu.NONE,400, 0,".TEX转换");
+    public void onCheckItem(ManageFile manageFile, int position) {
+        if(pasteState) {
+            setPasteState(false, false, "", null);
+        }
+        //选中
+        manageFile.setCheck(true);
+        //更新item
+        adapter.notifyItemChanged(position);
         //
-        popupMenu.setOnMenuItemClickListener(menuItem -> {
-            switch (menuItem.getItemId()){
-                case 100:
-                    if(isCheckItem()){
-                        ToastUtils.showShort("不支持多选!");
-                    }else{
-                        renameFile(file);
-                    }
-                    break;
-                case 200:
-                    List<ManageFile> check = getCheckFiles();
-                    //没有选中的。就删除长按的这个
-                    if(check.size() < 1){
-                        check.add(file);
-                    }
-                    deleteFiles(check);
-                    break;
-                case 300:
-                    List<ManageFile> checkFiles = getCheckFiles();
-                    //没有选中的。就删除长按的这个
-                    if(checkFiles.size() < 1){
-                        checkFiles.add(file);
-                    }
-                    //show
-                    SearchFilesTask searchFilesCallback = new SearchFilesTask(getActivity(), checkFiles);
-                    searchFilesCallback.setOnSearchDataListener(this::showDataView);
-                    searchFilesCallback.showSearchView("*.*");
-                case 400:
-                    if(isCheckItem()){
-                        ToastUtils.showShort("不支持多选!");
-                    }else{
-                        //
-                        ConvertTexDialog convertTexDialog = new ConvertTexDialog(requireContext(), file.isDirectory());
-                        convertTexDialog.setOnStartClickListener((format, type, isGenerate, isMultiplyAlpha, isBackup) -> {
-                            //
-                            ConvertTexTask convertTexCallback =
-                                    new ConvertTexTask(getContext(), new File(file.getFilePath()));
-                            convertTexCallback.setPixelFormat(format);
-                            convertTexCallback.setTextureType(type);
-                            convertTexCallback.setGenerateMipmaps(isGenerate);
-                            convertTexCallback.setPreMultiplyAlpha(isMultiplyAlpha);
-                            convertTexCallback.setConvertListener(succeed -> {
-                                if(succeed) {
-                                    updateFileData();
-                                }else {
-                                    ToastUtils.showShort("失败!");
-                                }
-                            });
-                            //执行
-                            convertTexCallback.execute();
-                        });
-                        convertTexDialog.show();
-                    }
-                    break;
-            }
-            return false;
-        });
-        popupMenu.show();
-    }
-
-    @Override
-    public void onCheckItem() {
         //选中了文件
         setCheckItem(true);
         //选中的文件数量
@@ -600,7 +533,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
      * 获取选中的的文件列表
      * @return 文件集合
      */
-    private List<ManageFile> getCheckFiles(){
+    public List<ManageFile> getCheckFiles(){
         List<ManageFile> check = new ArrayList<>();
         for(ManageFile cm : adapter.getData()){
             if(!cm.isTag() && cm.isCheck())
@@ -614,7 +547,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
      * @param state 文件选择状态
      */
     @SuppressLint("NotifyDataSetChanged")
-    private void setFilesCheckState(boolean state){
+    public void setFilesCheckState(boolean state){
         for (ManageFile manageFile : adapter.getData()) {
             if(manageFile.isTag()){
                 continue;
@@ -666,11 +599,13 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
      * 改变按钮状态
      */
     private boolean isStartAnimation = true;
-    private void changeButtonState(){
+    public void changeButtonState(){
         //透明度动画
         AlphaAnimation anima = new AlphaAnimation(0.2f, 1.0f);
         anima.setDuration(500);// 设置动画显示时间
 
+        //粘贴按钮
+        binding.fileButton.setVisibility(pasteState ? View.VISIBLE : View.GONE);
         //选中的文件数量
         if(getCheckFileNum() > 0){
             if(isStartAnimation){
@@ -730,6 +665,27 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
 
     public void setReadFilePath(String readFilePath) {
         this.readFilePath = readFilePath;
+    }
+
+    public void setOpenFileIndex(int openFileIndex) {
+        this.openFileIndex = openFileIndex;
+    }
+
+    public void setPasteState(boolean pasteState, boolean copyOrMove, String text, ManageFile file) {
+        this.pasteState = pasteState;
+        this.copyOrMove = copyOrMove;
+        //////
+        binding.fileButton.setText(text);
+        binding.fileButton.setVisibility(pasteState ? View.VISIBLE : View.GONE);
+        ////
+        if(pasteState) {
+            waitCopyFile = getCheckFiles();
+            //没有选中的。就删除长按的这个
+            if(waitCopyFile.size() < 1) waitCopyFile.add(file);
+        }else {
+            waitCopyFile.clear();
+            waitCopyFile = null;
+        }
     }
 
     /**
@@ -798,6 +754,82 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
         if(binding.fileRecyclerView.getLayoutManager() != null && lastPosition >= 0) {
             ((LinearLayoutManager) binding.fileRecyclerView.getLayoutManager()).scrollToPositionWithOffset(position, 0);
             getPositionAndOffset(position);
+        }
+    }
+
+    /**
+     * 显示书签
+     */
+    private ListItemDialog<BookMarkAdapter> itemDialog;
+    private void showBookMark() {
+        try {
+            List<BookMark> data = DBService.getInstance(requireContext())
+                    .queryAllBookMark(BookMark.Type.Path);
+            if(data.size() < 1) {
+                BookMark bookMark = new BookMark();
+                bookMark.setName("暂无书签");
+                bookMark.setPath("暂无书签");
+                bookMark.setDescribe("暂无书签");
+                data.add(bookMark);
+            }
+            BookMarkAdapter bookMarkAdapter = new BookMarkAdapter(data);
+            bookMarkAdapter.setOnItemListener(new BookMarkAdapter.OnItemListener() {
+                @Override
+                public void onEdit(BookMark bookMark, int index) {
+                    if(null == bookMark.getDescribe() || !bookMark.getDescribe().equals("暂无书签")) {
+                        RenameFileView addBookMark = new RenameFileView(requireContext());
+                        addBookMark.setOnRenameFileListener((newName, dialog) -> {
+                            if(dialog != null) dialog.dismiss();
+                            if(!TextUtils.isEmpty(newName)) {
+                                bookMark.setName(newName);
+                                if(DBService.getInstance(requireContext()).updateBookMark(bookMark)){
+                                    ToastUtils.showShort("修改成功");
+                                    bookMarkAdapter.notifyItemChanged(index);
+                                }else {
+                                    ToastUtils.showShort("修改失败");
+                                }
+                            }
+                        });
+                        addBookMark.setShowPaste(true);
+                        addBookMark.rename("重命名书签", bookMark.getName(), "重命名");
+                    }
+                }
+                @Override
+                public void onClick(BookMark bookMark) {
+                    if(null == bookMark.getDescribe() || !bookMark.getDescribe().equals("暂无书签")) {
+                        File file = new File(bookMark.getPath());
+                        if(!file.exists()){
+                            ToastUtils.showShort("路径不存在!");
+                            return;
+                        }
+                        if(file.isFile())
+                            updateFileData(file.getParent()+File.separator);
+                        else
+                            updateFileData(file.getPath());
+                        if(itemDialog != null) itemDialog.dismiss();
+                    }
+                }
+                @SuppressLint("NotifyDataSetChanged")
+                @Override
+                public boolean onLongClick(BookMark bookMark, int index) {
+                    if(null == bookMark.getDescribe() || !bookMark.getDescribe().equals("暂无书签")) {
+                        if(DBService.getInstance(requireContext()).deleteBookMark(bookMark)){
+                            bookMarkAdapter.getData().remove(index);
+                            bookMarkAdapter.notifyDataSetChanged();
+                            ToastUtils.showShort("删除成功");
+                        }else {
+                            ToastUtils.showShort("删除失败");
+                        }
+                    }
+                    return true;
+                }
+            });
+            //
+            itemDialog = new ListItemDialog<>(requireContext(), bookMarkAdapter);
+            itemDialog.setTitle("书签列表");
+            itemDialog.show();
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 

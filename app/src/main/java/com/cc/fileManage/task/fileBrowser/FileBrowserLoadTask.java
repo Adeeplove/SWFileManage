@@ -169,6 +169,7 @@ public class FileBrowserLoadTask extends AsynchronousTask<String, String, List<M
         //要高亮的item
         if (showItem != null) {
             for (ManageFile f : data) {
+                if(f.isTag()) continue;
                 if (f.getFileName().equals(showItem)) {
                     //高亮
                     f.setHighlight(true);

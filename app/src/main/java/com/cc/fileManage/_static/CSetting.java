@@ -5,12 +5,14 @@ import android.content.SharedPreferences;
 
 public class CSetting {
 
-    private static final String[] serialPorts = new String[]{"home"};
+    private static final String[] serialPorts = new String[]{"home","hidden"};
     //配置文件
     private static final String serialPortSettingName = "setting";
 
     //浏览器是否为主页
     public static boolean webIsHome;
+    //显示隐藏文件
+    public static boolean showHiddenFile;
 
     public static void init(Context context){
         //尝试读取配置文件
@@ -28,6 +30,8 @@ public class CSetting {
         SharedPreferences map = readSetting(context);
         //浏览器是否为主页
         webIsHome = map.getBoolean(serialPorts[0], false);
+        //显示隐藏文件
+        showHiddenFile = map.getBoolean(serialPorts[1], false);
     }
 
     //写配置文件
@@ -39,6 +43,8 @@ public class CSetting {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         //浏览器是否为主页
         editor.putBoolean(serialPorts[0], false);
+        //显示隐藏文件
+        editor.putBoolean(serialPorts[1], false);
         //步骤4：提交
         editor.apply();
     }
@@ -53,6 +59,8 @@ public class CSetting {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         //浏览器是否为主页
         editor.putBoolean(serialPorts[0], webIsHome);
+        //显示隐藏文件
+        editor.putBoolean(serialPorts[1], showHiddenFile);
         //步骤4：提交
         editor.apply();
     }

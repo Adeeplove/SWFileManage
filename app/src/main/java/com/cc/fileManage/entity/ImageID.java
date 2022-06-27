@@ -1,6 +1,5 @@
 package com.cc.fileManage.entity;
 
-
 import com.cc.fileManage.R;
 
 public class ImageID

@@ -14,6 +14,7 @@
         <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_menu_camera.xml" value="0.24974463738508682" />
         <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_menu_gallery.xml" value="0.1" />
         <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_menu_slideshow.xml" value="0.1" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_oil.xml" value="0.1045" />
         <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_refresh.xml" value="0.24974463738508682" />
         <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_reverse.xml" value="0.24974463738508682" />
         <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_right.xml" value="0.1" />
@@ -36,6 +37,7 @@
         <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/custom_progress_dialog_view.xml" value="0.24375" />
         <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/file_browser.xml" value="0.234375" />
         <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/file_browser_item.xml" value="0.14" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/file_operations_item.xml" value="0.24375" />
         <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/file_rename.xml" value="0.24375" />
         <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/fragment_browser.xml" value="0.24375" />
         <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/fragment_file_browser.xml" value="0.17" />

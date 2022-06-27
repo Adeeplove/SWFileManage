@@ -2,6 +2,7 @@ package com.cc.fileManage.ui.views;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.TextUtils;
 import android.view.View;
 
 import androidx.appcompat.app.AlertDialog;
@@ -20,6 +21,7 @@ public class ListItemDialog<T extends RecyclerView.Adapter<?>> {
     ///
     private AlertDialog dialog;
     private String title = "ListItemDialog";
+    private LinearLayoutManager layoutManager;
     //触摸消失
     private boolean isCancelable;
 
@@ -40,6 +42,10 @@ public class ListItemDialog<T extends RecyclerView.Adapter<?>> {
         this.isCancelable = cancelable;
     }
 
+    public void setLayoutManager(LinearLayoutManager layoutManager) {
+        this.layoutManager = layoutManager;
+    }
+
     public T getAdapter() {
         return adapter;
     }
@@ -54,13 +60,15 @@ public class ListItemDialog<T extends RecyclerView.Adapter<?>> {
         //============
         View view = View.inflate(context, R.layout.list_item_dialog, null);
         RecyclerView recyclerView = view.findViewById(R.id.list_item_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.setLayoutManager(layoutManager == null ? new LinearLayoutManager(context) : layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);
         ///=============
         dismiss();
         dialog = new AlertDialog.Builder(context).create();
-        dialog.setTitle(getTitle());
+        if(!TextUtils.isEmpty(title)) {
+            dialog.setTitle(getTitle());
+        }
         dialog.setView(view);
         dialog.setCancelable(isCancelable);
         if(!isCancelable) {
