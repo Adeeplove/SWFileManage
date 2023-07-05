@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ProgressBar
+        android:id="@+id/browser_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"/>
+
+    <com.tencent.smtt.sdk.WebView
+        android:layout_weight="1"
+        android:id="@+id/browser_web"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/item_layout"
+        android:layout_width="match_parent"
+        android:clickable="false"
+        android:layout_height="45dp"
+        android:theme="@style/Theme.SWFileManage">
+
+        <ImageView
+            android:id="@+id/browser_up"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:scaleType="fitCenter"
+            android:src="?ic_left"
+            android:background="@drawable/root_style"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintStart_toStartOf="@+id/item_layout"
+            app:layout_constraintBottom_toBottomOf="@+id/item_layout"
+            app:layout_constraintEnd_toStartOf="@+id/browser_to"
+            app:layout_constraintTop_toTopOf="@+id/item_layout" />
+
+        <ImageView
+            android:id="@+id/browser_to"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/root_style"
+            android:scaleType="fitCenter"
+            android:src="?ic_right"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintBottom_toBottomOf="@+id/item_layout"
+            app:layout_constraintEnd_toStartOf="@id/browser_refresh"
+            app:layout_constraintStart_toEndOf="@+id/browser_up"
+            app:layout_constraintTop_toTopOf="@+id/item_layout" />
+
+        <ImageView
+            android:id="@+id/browser_refresh"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:scaleType="fitCenter"
+            android:src="?ic_refresh"
+            android:background="@drawable/root_style"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintEnd_toEndOf="@+id/item_layout"
+            app:layout_constraintBottom_toBottomOf="@+id/item_layout"
+            app:layout_constraintStart_toEndOf="@+id/browser_to"
+            app:layout_constraintTop_toTopOf="@+id/item_layout" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

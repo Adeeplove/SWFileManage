@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_welcome">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.cc.fileManage.ui.browser.FileBrowserFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_file_browser" />
+
+    <fragment
+        android:id="@+id/nav_welcome"
+        android:name="com.cc.fileManage.ui.WelcomeFragment"
+        android:label="@string/app_name" />
+
+    <fragment
+        android:id="@+id/nav_browser"
+        android:name="com.cc.fileManage.ui.browser.BrowserFragment"
+        android:label="@string/browser_name" />
+</navigation>

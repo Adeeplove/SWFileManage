@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_width="match_parent"
+        android:text="正在搜索..."
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        style="@style/AppTitleColor"
+        android:layout_marginTop="10dp"
+        android:id="@+id/search_message_title"/>
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="25dp"
+        android:id="@+id/search_message_text"
+        android:maxLines="2"/>
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        style="@style/AppTitleColor"
+        android:gravity="right"
+        android:id="@+id/search_message_size"/>
+
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="停止搜索"
+        android:layout_marginTop="10dp"
+        android:id="@+id/search_message_button"
+        android:layout_marginBottom="10dp"/>
+</LinearLayout>

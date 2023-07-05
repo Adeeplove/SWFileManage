@@ -1,0 +1,14 @@
+<resources>
+    <string name="desc" translatable="false">NONE</string>
+    <string name="app_name" translatable="false">SW管理器</string>
+    <string name="browser_name" translatable="false">SW浏览器</string>
+    <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
+    <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
+    <string name="nav_header_subtitle" translatable="false">测试</string>
+    <string name="nav_header_desc" translatable="false">Navigation header</string>
+    <string name="action_settings" translatable="false">Settings</string>
+
+    <string name="move_file" translatable="false">复制并替换</string>
+    <string name="skip_file" translatable="false">跳过该文件</string>
+    <string name="action_file" translatable="false">为后续冲突执行相同操作</string>
+</resources>

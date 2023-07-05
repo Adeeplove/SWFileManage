@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_width="match_parent"
+        android:text="图片格式"
+        style="@style/AppTitleColor"
+        android:layout_margin="10dp" />
+
+    <org.angmarch.views.NiceSpinner
+        android:id="@+id/tex_format_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/Theme.Spinner"
+        android:layout_margin="10dp" />
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_width="wrap_content"
+        android:text="图片类型"
+        style="@style/AppTitleColor"
+        android:layout_margin="10dp" />
+
+    <org.angmarch.views.NiceSpinner
+        android:id="@+id/tex_type_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:theme="@style/Theme.Spinner"
+        android:layout_gravity="left"/>
+
+    <CheckBox
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="生成Mipmap映射"
+        android:checked="true"
+        android:id="@+id/tex_generate"
+        style="@style/AppTitleColor"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"/>
+
+    <CheckBox
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="预乘透明度"
+        android:checked="true"
+        android:id="@+id/tex_multiplyAlpha"
+        style="@style/AppTitleColor"
+        android:layout_margin="10dp"/>
+
+    <CheckBox
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="生成备份"
+        android:checked="true"
+        android:visibility="gone"
+        android:id="@+id/tex_backup"
+        style="@style/AppTitleColor"
+        android:layout_margin="10dp"/>
+
+    <TextView
+        android:id="@+id/tex_tips"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="tips: 将转换文件夹及子文件夹下的.tex文件 ZIP压缩包内的也会被转换!"
+        android:visibility="gone"
+        style="@style/AppTitleColor"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="10dp"/>
+
+    <LinearLayout
+        android:layout_margin="10dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:text="取消"
+            android:layout_weight="1"
+            android:id="@+id/tex_cancel"
+            android:layout_marginRight="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+
+        <Button
+            android:text="开始"
+            android:layout_weight="1"
+            android:id="@+id/tex_start"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
+</LinearLayout>

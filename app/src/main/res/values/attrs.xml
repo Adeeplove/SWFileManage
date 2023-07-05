@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="ic_left" format="reference" />
+    <attr name="ic_refresh" format="reference" />
+    <attr name="ic_add" format="reference" />
+    <attr name="ic_up" format="reference" />
+    <attr name="ic_right" format="reference" />
+    <attr name="ic_link" format="reference" />
+    <attr name="ic_reverse" format="reference" />
+    <attr name="ic_text_save" format="reference" />
+</resources>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.cc.fileManage">
+
+    <application
+        android:name=".App"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SWFileManage">
+
+        <meta-data
+            android:name="android.max_aspect"
+            android:value="4.0" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.cc.fileManage.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+            android:theme="@style/Theme.SWFileManage.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".ui.activity.ErrorActivity" />
+
+        <activity
+            android:name=".ui.activity.EditActivity"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.SWFileManage"
+            android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            android:screenOrientation="fullSensor">
+        </activity>
+
+        <activity
+            android:name=".ui.activity.LoadTexActivity"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.SWFileManage.NoActionBar"
+            android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            android:screenOrientation="fullSensor">
+        </activity>
+
+        <activity
+            android:name=".ui.activity.PhotoActivity"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.SWFileManage.NoActionBar"
+            android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            android:screenOrientation="fullSensor">
+        </activity>
+    </application>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"
+        tools:ignore="ManifestOrder" /> <!-- 获取网络状态 -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- 网络通信-->
+
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" /> <!-- 读写内部储存 11-->
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- 读写内部储存 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" /> <!-- android11以上获取应用列表 -->
+</manifest>

@@ -1,0 +1,74 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.SWFileManage" parent="Theme.MaterialComponents.Light.DarkActionBar.Bridge">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/teal_700</item>
+        <item name="colorPrimaryVariant">@color/teal_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+
+        <item name="ic_left">@drawable/ic_left</item>
+        <item name="ic_refresh">@drawable/ic_refresh</item>
+        <item name="ic_add">@drawable/ic_add</item>
+        <item name="ic_up">@drawable/ic_up</item>
+        <item name="ic_right">@drawable/ic_right</item>
+        <item name="ic_link">@drawable/ic_link</item>
+        <item name="ic_reverse">@drawable/ic_reverse</item>
+        <item name="ic_text_save">@drawable/ic_text_save</item>
+    </style>
+
+    <!-- toolbar颜色. -->
+    <style name="ToolBarTheme">
+        <!--        标题颜色-->
+        <item name="titleTextColor">@color/white</item>
+        <item name="subtitleTextColor">@color/white</item>
+        <!--        箭头跟菜单颜色-->
+        <item name="colorControlNormal">@color/white</item>
+    </style>
+
+    <!-- 15sp大小字体颜色. -->
+    <style name="AppTextColor">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+
+    <!-- 默认字体颜色. -->
+    <style name="AppTitleColor">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <!-- operations_item字体颜色. -->
+    <style name="AppItemColor">
+        <item name="android:background">@color/white</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+
+    <!-- 下方菜单颜色. -->
+    <style name="AppMenuColor">
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <!--    无actionBar主题-->
+    <style name="Theme.SWFileManage.NoActionBar" parent="Theme.SWFileManage">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!--自定义耗时对话框-->
+    <style name="CustomProgressDialog" parent="Theme.AppCompat.Dialog">
+        <!--此属性控制悬浮窗背景是否变暗-->
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <!--    appbar-->
+    <style name="Theme.SWFileManage.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+</resources>

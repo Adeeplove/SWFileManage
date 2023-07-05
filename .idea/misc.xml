@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.24974463738508682" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/button_blue.xml" value="0.24974463738508682" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/button_red.xml" value="0.24974463738508682" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_add.xml" value="0.24974463738508682" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_file.xml" value="0.1" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_left.xml" value="0.1" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_link.xml" value="0.1" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_menu_camera.xml" value="0.24974463738508682" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_menu_gallery.xml" value="0.1" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_menu_slideshow.xml" value="0.1" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_oil.xml" value="0.1045" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_refresh.xml" value="0.24974463738508682" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_reverse.xml" value="0.24974463738508682" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_right.xml" value="0.1" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_text_redo.xml" value="0.24974463738508682" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_text_save.xml" value="0.24974463738508682" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_text_undo.xml" value="0.24974463738508682" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/ic_up.xml" value="0.24974463738508682" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/progress_loading.xml" value="0.1" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/root_style.xml" value="0.24974463738508682" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/drawable/side_nav_bar.xml" value="0.1" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout-v23/file_browser_item.xml" value="0.24375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/acticity_photo.xml" value="0.1766304347826087" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/acticity_tex.xml" value="0.234375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/activity_edit.xml" value="0.24375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/activity_error.xml" value="0.234375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/activity_main.xml" value="0.11352169525731584" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/app_bar_main.xml" value="0.11352169525731584" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/content_main.xml" value="0.11352169525731584" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/convert_tex_dialog.xml" value="0.24375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/custom_progress_dialog_view.xml" value="0.24375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/file_browser.xml" value="0.234375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/file_browser_item.xml" value="0.14" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/file_operations_item.xml" value="0.24375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/file_rename.xml" value="0.24375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/fragment_browser.xml" value="0.24375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/fragment_file_browser.xml" value="0.17" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/html_content_dialog.xml" value="0.24375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/install_zip_dialog.xml" value="0.234375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/list_item_dialog.xml" value="0.24375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/nav_header_main.xml" value="0.11352169525731584" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/save_tex_dialog.xml" value="0.33" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/search_files.xml" value="0.234375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/layout/search_message.xml" value="0.234375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/menu/activity_main_drawer.xml" value="0.24375" />
+        <entry key="..\:/AndroidProject/TestProject/SWFileManage/app/src/main/res/menu/main.xml" value="0.24375" />
+      </map>
+    </option>
+  </component>
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
