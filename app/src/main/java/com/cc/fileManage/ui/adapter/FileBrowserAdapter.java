@@ -22,7 +22,7 @@ import com.cc.fileManage.R;
 import com.cc.fileManage.entity.ImageID;
 import com.cc.fileManage.entity.file.FileApi;
 import com.cc.fileManage.entity.file.JFile;
-import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.ui.callback.FileItemTouchHelperCallback;
 import com.cc.fileManage.ui.views.EllipsizeTextView;
 
@@ -34,7 +34,7 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
 {
     private final Context context;
     //数据
-    private List<ManageFile> data;
+    private List<MFile> data;
     //高亮的item index
     private int              highlightIndex;
     //监听
@@ -57,11 +57,11 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
         return highlightIndex;
     }
 
-    public void setData(List<ManageFile> data) {
+    public void setData(List<MFile> data) {
         this.data = data;
     }
 
-    public List<ManageFile> getData() {
+    public List<MFile> getData() {
         return data;
     }
 
@@ -77,7 +77,7 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
     @Override
     public void onBindViewHolder(@NonNull BrowserViewHolder holder, @SuppressLint("RecyclerView") int index)
     {
-        ManageFile file = data.get(index);
+        MFile file = data.get(index);
         //是否被选中
         if(file.isCheck()){
             holder.parent.setBackgroundColor(context.getResources().getColor(R.color.teal_700));
@@ -139,7 +139,7 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
     @Override
     public void onItemChecked(RecyclerView.ViewHolder viewHolder, int position) {
         if(data != null){
-            ManageFile manageFile = data.get(position);
+            MFile manageFile = data.get(position);
             //是tag或者是已经选中的
             if(manageFile.isTag() || manageFile.isCheck()){
                 //更新item
@@ -185,7 +185,7 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
      * @param file 文件
      * @param iv    图片控件
      */
-    private void setIcon(ManageFile file, ImageView iv){
+    private void setIcon(MFile file, ImageView iv){
         //转成小写
         if (file.isTag())
         {
@@ -297,7 +297,7 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
      * @param file          文件路径
      * @param imageView     图片控件
      */
-    private void loadImage(ManageFile file, ImageView imageView) {
+    private void loadImage(MFile file, ImageView imageView) {
         if(file instanceof JFile) {
             Glide.with(context.getApplicationContext())
                     .load(file.getPath())
@@ -321,8 +321,8 @@ public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.
     }
 
     public interface OnItemClickListener{
-        void onItemClick(ManageFile file, int index);
-        void onItemLongClick(ManageFile file, int index);
-        void onCheckItem(ManageFile file, int index);
+        void onItemClick(MFile file, int index);
+        void onItemLongClick(MFile file, int index);
+        void onCheckItem(MFile file, int index);
     }
 }

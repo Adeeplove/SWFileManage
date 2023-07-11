@@ -2,15 +2,22 @@ package com.cc.fileManage.entity.file;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
 import com.cc.fileManage.utils.CharUtil;
 
+import org.apache.tools.zip.Zip;
+import org.apache.tools.zip.ZipFile;
+
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -19,7 +26,7 @@ import java.util.List;
 /**
  *  java file 特殊类
  */
-public class JFile extends ManageFile{
+public class JFile extends MFile {
 
     private File file;
 
@@ -81,7 +88,7 @@ public class JFile extends ManageFile{
     }
 
     @Override
-    public ManageFile getParentFile() {
+    public MFile getParentFile() {
         return new JFile(getParent());
     }
 
@@ -127,8 +134,8 @@ public class JFile extends ManageFile{
     }
 
     @Override
-    public List<ManageFile> listFiles(boolean showHidden) {
-        List<ManageFile> manageFiles = new ArrayList<>();
+    public List<MFile> listFiles(boolean showHidden) {
+        List<MFile> manageFiles = new ArrayList<>();
         ////
         String[] list = file.list();
         if (list == null) return manageFiles;
@@ -221,6 +228,16 @@ public class JFile extends ManageFile{
     }
 
     @Override
+    public boolean mkdirsF() {
+        try {
+            return createFile();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
     public String lengthString() {
         return FileApi.sizeToString(length());
     }
@@ -241,6 +258,18 @@ public class JFile extends ManageFile{
     }
 
     @Override
+    public ParcelFileDescriptor openFileDescriptor(String mode) throws FileNotFoundException {
+        return ParcelFileDescriptor.open(file, ParcelFileDescriptor.parseMode(mode));
+    }
+
+    @Override
+    public Zip openZipFile() throws IOException {
+        if(exists() && isFile() && canRead())
+            return new ZipFile(file);
+        return null;
+    }
+
+    @Override
     public boolean rename(String displayName) {
         File target = new File(file.getParentFile(), displayName);
         if(target.exists()) return false;
@@ -254,7 +283,7 @@ public class JFile extends ManageFile{
     }
 
     @Override
-    public boolean move(Context context, ManageFile manageFile) throws Exception {
+    public boolean move(Context context, MFile manageFile) throws Exception {
         if(getESPath().equals(manageFile.getESPath())) {
             return false;
         }
@@ -269,7 +298,7 @@ public class JFile extends ManageFile{
     }
 
     @Override
-    public boolean copy(Context context, ManageFile manageFile) throws Exception {
+    public boolean copy(Context context, MFile manageFile) throws Exception {
         if(getESPath().equals(manageFile.getESPath())) {
             return false;
         }

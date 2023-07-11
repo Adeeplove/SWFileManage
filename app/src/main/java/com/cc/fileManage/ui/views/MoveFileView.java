@@ -11,7 +11,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.R;
-import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.task.fileBrowser.CopyOrMoveFileTask;
 
 import java.util.List;
@@ -96,7 +96,7 @@ public class MoveFileView {
      * @param listener          回调
      */
     public void copyOrMove(Context context,
-                           List<ManageFile> waitCopyFile, String readFilePath, boolean copyOrMove, OnListener listener) {
+                           List<MFile> waitCopyFile, String readFilePath, boolean copyOrMove, OnListener listener) {
         ///
         CopyOrMoveFileTask task = new CopyOrMoveFileTask(context, waitCopyFile,
                 readFilePath, copyOrMove, new CopyOrMoveFileTask.OnFileExistsListener() {

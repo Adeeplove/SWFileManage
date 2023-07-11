@@ -9,7 +9,7 @@ import android.text.TextUtils;
 
 import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.entity.TEXFile;
-import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.utils.CommonUtil;
 import com.cc.fileManage.utils.TexFileUtil;
 
@@ -60,11 +60,11 @@ public class SplitPng {
         }
     }
 
-    public static void splitPng(List<ManageFile> data) {
-        ManageFile xml = null;
-        ManageFile png = null;
+    public static void splitPng(List<MFile> data) {
+        MFile xml = null;
+        MFile png = null;
         ///
-        for (ManageFile m : data) {
+        for (MFile m : data) {
             if(m.getName().endsWith(".png") || m.getName().endsWith(".tex"))
                 png = m;
             else if(m.getName().endsWith(".xml"))
@@ -84,7 +84,7 @@ public class SplitPng {
     }
 
     // 拆
-    private static void split(List<Xml> data, ManageFile manageFile) {
+    private static void split(List<Xml> data, MFile manageFile) {
         //画笔
         Paint paint = new Paint();
         //抗锯齿
@@ -133,7 +133,7 @@ public class SplitPng {
      * @param manageFile    png或tex文件
      * @return              bitmap
      */
-    private static Bitmap loadImage(ManageFile manageFile) {
+    private static Bitmap loadImage(MFile manageFile) {
         try {
             if(manageFile.getName().toLowerCase().endsWith(".png")) {
                 return BitmapFactory.decodeFile(manageFile.getPath());
@@ -176,7 +176,7 @@ public class SplitPng {
      * @param manageFile    xml配置文件
      * @return              xml数据
      */
-    public static List<Xml> loadXml(ManageFile manageFile) {
+    public static List<Xml> loadXml(MFile manageFile) {
         List<Xml> xmlList = new ArrayList<>();
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         try {

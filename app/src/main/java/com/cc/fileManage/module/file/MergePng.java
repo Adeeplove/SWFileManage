@@ -7,7 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 
 import com.blankj.utilcode.util.ToastUtils;
-import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.entity.file.MFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,14 +40,14 @@ public class MergePng {
     /**
      * 合并 png
      */
-    public static void mergePng(List<ManageFile> manageFiles, int spacingValue){
+    public static void mergePng(List<MFile> manageFiles, int spacingValue){
         spacing = Math.max(spacing, spacingValue);
         spacing = Math.min(50, spacing);
         try {
             int countWidth = 0, countHeight = 0;
             List<Png> pngList = new ArrayList<>(); // 图片信息合集
             /////
-            for (ManageFile mf : manageFiles) {
+            for (MFile mf : manageFiles) {
                 BitmapFactory.Options options = getBitmapWH(mf);
                 if(options.outWidth > 0 && options.outHeight > 0) {
                     countWidth += options.outWidth;
@@ -355,7 +355,7 @@ public class MergePng {
      * @param f 图片文件
      * @return  图片信息
      */
-    private static BitmapFactory.Options getBitmapWH(ManageFile f) {
+    private static BitmapFactory.Options getBitmapWH(MFile f) {
         BitmapFactory.Options opts = new BitmapFactory.Options();
         try {
             //设置为true,代表加载器不加载图片,而是把图片的宽高读出来

@@ -2,7 +2,7 @@ package com.cc.fileManage.module.file;
 
 import android.content.Context;
 
-import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.utils.CharUtil;
 
 import java.io.File;
@@ -17,7 +17,7 @@ public class RenameFile {
      * @param newName       新名称
      * @param listener      回调接口
      */
-    public static void rename(Context context, ManageFile file, String path,
+    public static void rename(Context context, MFile file, String path,
                               String newName, OnRenameListener listener) {
         ///
         if(!CharUtil.isValidFileName(newName)) {
@@ -25,7 +25,7 @@ public class RenameFile {
             return;
         }
         String rootPath = path.endsWith(File.separator) ? path : path + File.separator;
-        ManageFile target = ManageFile.create(context, rootPath + newName);
+        MFile target = MFile.create(context, rootPath + newName);
         if(target.exists()) {
             listener.onMsg(false, "文件已存在!");
             return;

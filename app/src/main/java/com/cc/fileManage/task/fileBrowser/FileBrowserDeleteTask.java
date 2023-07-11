@@ -3,7 +3,7 @@ package com.cc.fileManage.task.fileBrowser;
 import android.app.AlertDialog;
 import android.content.Context;
 
-import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.task.AsynchronousTask;
 
 import java.lang.ref.WeakReference;
@@ -15,11 +15,11 @@ public class FileBrowserDeleteTask extends AsynchronousTask<String, String, Stri
 
     private AlertDialog dialog;
 
-    private final List<ManageFile> data;
+    private final List<MFile> data;
 
     private OnDeleteListener onDeleteListener;
 
-    public FileBrowserDeleteTask(Context context, List<ManageFile> data){
+    public FileBrowserDeleteTask(Context context, List<MFile> data){
         this.weakReference = new WeakReference<>(context);
         this.data = data;
     }
@@ -45,7 +45,7 @@ public class FileBrowserDeleteTask extends AsynchronousTask<String, String, Stri
     @Override
     protected String doInBackground(String... strings) {
         try{
-            for(ManageFile file : data){
+            for(MFile file : data){
                 Context context = weakReference.get();
                 if(context == null) break;
                 ///===

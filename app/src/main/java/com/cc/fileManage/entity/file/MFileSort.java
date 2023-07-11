@@ -2,10 +2,10 @@ package com.cc.fileManage.entity.file;
 
 import java.util.Comparator;
 
-public class ManageFileSort implements Comparator<ManageFile>
+public class MFileSort implements Comparator<MFile>
 {
     @Override
-    public int compare(ManageFile f1, ManageFile f2) {
+    public int compare(MFile f1, MFile f2) {
         if(f1.isTag() || f2.isTag()) {
             return 0;
         } else if (f1.isDirectory() && f2.isDirectory()) {          // 都是目录

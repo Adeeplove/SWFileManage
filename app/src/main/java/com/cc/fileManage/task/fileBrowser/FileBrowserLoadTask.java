@@ -6,8 +6,8 @@ import android.content.UriPermission;
 import android.widget.Toast;
 
 import com.cc.fileManage.entity.file.FileApi;
-import com.cc.fileManage.entity.file.ManageFile;
-import com.cc.fileManage.entity.file.ManageFileSort;
+import com.cc.fileManage.entity.file.MFile;
+import com.cc.fileManage.entity.file.MFileSort;
 import com.cc.fileManage.entity.file.OnFileDataListener;
 import com.cc.fileManage.task.AsynchronousTask;
 import com.cc.fileManage.utils.ProgressDialogUtil;
@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FileBrowserLoadTask extends AsynchronousTask<String, String, List<ManageFile>> {
+public class FileBrowserLoadTask extends AsynchronousTask<String, String, List<MFile>> {
 
     private final WeakReference<Context> weakReference;
     /// 文件数量
@@ -89,19 +89,19 @@ public class FileBrowserLoadTask extends AsynchronousTask<String, String, List<M
     }
 
     @Override
-    protected List<ManageFile> doInBackground(String... strings) {
+    protected List<MFile> doInBackground(String... strings) {
         //数据区
-        List<ManageFile> data = new ArrayList<>();
+        List<MFile> data = new ArrayList<>();
         try {
             Context context = weakReference.get();
             if(context == null) return data;
             /// 构建ManageFile
-            ManageFile readFile = ManageFile.create(context, readPath);
+            MFile readFile = MFile.create(context, readPath);
             /// 不是根目录 则添加返回上一级item
             if (!readPath.equals(File.separator)) {
                 /// 父目录是否可读
                 if (canReadSystemPath || FileApi.isDataDir(readFile.getParent()) || readFile.parentCanRead()) {
-                    data.add(ManageFile.createTag());
+                    data.add(MFile.createTag());
                 }
             }
             // 是否加载图标
@@ -110,7 +110,7 @@ public class FileBrowserLoadTask extends AsynchronousTask<String, String, List<M
             /// 列出子文件
             readFile.listFiles(context, new OnFileDataListener() {
                 @Override
-                public void onData(ManageFile file, String readPath) {
+                public void onData(MFile file, String readPath) {
                     if(!showHideFile && file.isHidden()) return;
                     /////////
                     if(file.isFile()) {
@@ -141,7 +141,7 @@ public class FileBrowserLoadTask extends AsynchronousTask<String, String, List<M
             ///========直接退出==============
             if(isCancelled()) return null;
             ///排序
-            Collections.sort(data, new ManageFileSort());
+            Collections.sort(data, new MFileSort());
         } catch (Exception e) {
             //更新数据
             onLoadFilesListener.onFailure(e);
@@ -165,7 +165,7 @@ public class FileBrowserLoadTask extends AsynchronousTask<String, String, List<M
     }
 
     @Override
-    protected void onPostExecute(List<ManageFile> data) {
+    protected void onPostExecute(List<MFile> data) {
         dismiss();
         if(data != null) {
             //更新数据
@@ -224,7 +224,7 @@ public class FileBrowserLoadTask extends AsynchronousTask<String, String, List<M
 
     //回调接口
     public interface OnFileChangeListener{
-        void onFilesData(List<ManageFile> data, String showItem);
+        void onFilesData(List<MFile> data, String showItem);
         void askPathPermission(String dir);
         void onFailure(Exception e);
         void onPathNoExist(String path);

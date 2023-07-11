@@ -38,12 +38,7 @@ public class StandardMsgTask extends AsynchronousTask<String, String, String> {
 
     @Override
     protected String doInBackground(String... strings) {
-        try {
-            return onCompleteListener.doMethod();
-        } catch (Exception e){
-            e.printStackTrace();
-            return e.getMessage();
-        }
+        return onCompleteListener.doMethod();
     }
 
     @Override
@@ -66,7 +61,7 @@ public class StandardMsgTask extends AsynchronousTask<String, String, String> {
     private final OnCompleteListener onCompleteListener;
 
     public interface OnCompleteListener {
-        String doMethod() throws Exception;
+        String doMethod();
         void success(String msg, float time);
     }
 }

@@ -5,7 +5,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.cc.fileManage.entity.file.FileApi;
-import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.entity.file.OnFileDataListener;
 import com.cc.fileManage.task.AsynchronousTask;
 
@@ -22,7 +22,7 @@ public class CopyOrMoveFileTask extends AsynchronousTask<String, String, String>
 
     private final WeakReference<Context> weakReference;
     // 待复制/移动文件
-    private final ConcurrentLinkedDeque<ManageFile> data;
+    private final ConcurrentLinkedDeque<MFile> data;
     // 文件重复接口
     private final OnFileExistsListener listener;
     // 写出目标路径
@@ -38,9 +38,9 @@ public class CopyOrMoveFileTask extends AsynchronousTask<String, String, String>
     // 是否覆盖 全部覆盖 全部跳过
     private boolean cover = false, coverAll = false, skipAll = false;
     // 待删除的文件
-    private final LinkedList<ManageFile> deletedFile;
+    private final LinkedList<MFile> deletedFile;
 
-    public CopyOrMoveFileTask(Context context, List<ManageFile> data,
+    public CopyOrMoveFileTask(Context context, List<MFile> data,
                               String outFilePath, boolean isMove, OnFileExistsListener listener) {
         this.weakReference = new WeakReference<>(context);
         this.data = new ConcurrentLinkedDeque<>(data);
@@ -73,7 +73,7 @@ public class CopyOrMoveFileTask extends AsynchronousTask<String, String, String>
         while (!isCancelled()) {
             //// 是否停止遍历
             if(!exitTraversal) {
-                ManageFile source = data.poll();
+                MFile source = data.poll();
                 if(source == null) {
                     break;
                 } else {
@@ -86,8 +86,8 @@ public class CopyOrMoveFileTask extends AsynchronousTask<String, String, String>
                             deletedFile.offer(source);
                         }
                         // 目标路径
-                        ManageFile writeFile = source.getTarget() != null ? source.getTarget() :
-                                ManageFile.create(context, outFilePath + source.getName());
+                        MFile writeFile = source.getTarget() != null ? source.getTarget() :
+                                MFile.create(context, outFilePath + source.getName());
                         // 复制/移动
                         copyOrMove(context, source, writeFile);
                     }
@@ -147,7 +147,7 @@ public class CopyOrMoveFileTask extends AsynchronousTask<String, String, String>
      * 删除临时文件
      */
     private void removeFile() {
-        ManageFile file;
+        MFile file;
         while ((file = deletedFile.poll()) != null) {
             if(file.countChild()[0] == 0) {
                 file.delete();
@@ -171,7 +171,7 @@ public class CopyOrMoveFileTask extends AsynchronousTask<String, String, String>
      * 空循环线程
      * @param manageFile  重复的文件
      */
-    private void existPause(ManageFile manageFile) {
+    private void existPause(MFile manageFile) {
         this.exitTraversal = true;
         this.data.offerFirst(manageFile);
         publishProgress(EXIST, getOutName(manageFile.getTarget().getPath()));
@@ -217,7 +217,7 @@ public class CopyOrMoveFileTask extends AsynchronousTask<String, String, String>
      * @param source    源文件
      * @param target    目标目录
      */
-    private void copyOrMove(Context context, ManageFile source, ManageFile target) {
+    private void copyOrMove(Context context, MFile source, MFile target) {
         try {
             if(source.isFile()) {
                 // 复制/移动单个文件
@@ -245,7 +245,7 @@ public class CopyOrMoveFileTask extends AsynchronousTask<String, String, String>
      * @param target        目标文件
      * @throws Exception    Exception
      */
-    private void copyFile(Context context, ManageFile source, ManageFile target) throws Exception{
+    private void copyFile(Context context, MFile source, MFile target) throws Exception{
         if(FileApi.createOrExistsDir(target.getParentFile())) {
             ///
             if(fileCanWrite(target.exists(), source, target)) {
@@ -277,16 +277,16 @@ public class CopyOrMoveFileTask extends AsynchronousTask<String, String, String>
      * @param file      源文件
      * @param target    目标文件
      */
-    private void copyDir(Context context, ManageFile file, ManageFile target) {
+    private void copyDir(Context context, MFile file, MFile target) {
         // 目录路径
         String destPath = target.getPath() + File.separator;
         ///
         boolean[] haveChild = new boolean[] {true};
         file.listFiles(context, new OnFileDataListener() {
             @Override
-            public void onData(ManageFile f, String readPath) {
+            public void onData(MFile f, String readPath) {
                 haveChild[0] = false;
-                ManageFile destFile = ManageFile.create(context, destPath + f.getName());
+                MFile destFile = MFile.create(context, destPath + f.getName());
                 if(f.isFile()) {
                     f.setTarget(destFile);
                     data.offerFirst(f);
@@ -317,7 +317,7 @@ public class CopyOrMoveFileTask extends AsynchronousTask<String, String, String>
      * @param file      源文件夹
      * @param target    要创建的文件夹
      */
-    private void createEmptyDir(ManageFile file, ManageFile target) {
+    private void createEmptyDir(MFile file, MFile target) {
         boolean exist = target.exists();
         // 如果存在且不是文件夹
         if(exist && !target.isDirectory()) {
@@ -338,7 +338,7 @@ public class CopyOrMoveFileTask extends AsynchronousTask<String, String, String>
      * @param file  源文件
      * @return      是否继续写
      */
-    private boolean fileCanWrite(boolean exist, ManageFile file, ManageFile target) {
+    private boolean fileCanWrite(boolean exist, MFile file, MFile target) {
         // skip
         if(exitTraversal) {
             this.data.offerFirst(file);

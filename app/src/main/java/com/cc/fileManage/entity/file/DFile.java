@@ -2,6 +2,7 @@ package com.cc.fileManage.entity.file;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
 import android.text.TextUtils;
 
@@ -9,7 +10,12 @@ import androidx.annotation.NonNull;
 
 import com.blankj.utilcode.util.UriUtils;
 
+import org.apache.tools.zip.Zip;
+import org.apache.tools.zip.ZipInput;
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -18,7 +24,7 @@ import java.util.List;
 /**
  *  android documentFile 特殊类
  */
-public class DFile extends ManageFile{
+public class DFile extends MFile {
 
     private final Context   context;
     private String    name;
@@ -92,8 +98,8 @@ public class DFile extends ManageFile{
     }
 
     @Override
-    public ManageFile getParentFile() {
-        return ManageFile.create(context, getParent());
+    public MFile getParentFile() {
+        return MFile.create(context, getParent());
     }
 
     @Override
@@ -132,11 +138,11 @@ public class DFile extends ManageFile{
     }
 
     @Override
-    public List<ManageFile> listFiles(boolean showHidden) {
-        List<ManageFile> manageFiles = new ArrayList<>();
+    public List<MFile> listFiles(boolean showHidden) {
+        List<MFile> manageFiles = new ArrayList<>();
         listFiles(context, new OnFileDataListener() {
             @Override
-            public void onData(ManageFile file, String readPath) {
+            public void onData(MFile file, String readPath) {
                 // 不显示隐藏文件 直接跳过
                 if(!showHidden) {
                     if(!file.isHidden()) {
@@ -174,12 +180,12 @@ public class DFile extends ManageFile{
     }
 
     // 统计
-    private static void countDir(Context context, ManageFile dir, int[] array) {
+    private static void countDir(Context context, MFile dir, int[] array) {
         if (dir.isDirectory() || FileApi.isDataDir(dir.getPath())) {
             ////
             FileApi.document(context, dir.getPath(), new OnFileDataListener() {
                 @Override
-                public void onData(ManageFile file, String readPath) {
+                public void onData(MFile file, String readPath) {
                     if(file.isFile()) {
                         array[0]++;
                     } else {
@@ -208,6 +214,11 @@ public class DFile extends ManageFile{
     @Override
     public boolean mkdirs() {
         return FileApi.mkdirs(context, getPath()) != null;
+    }
+
+    @Override
+    public boolean mkdirsF() {
+        return FileApi.mkdirs(context, getPath(), true) != null;
     }
 
     @Override
@@ -256,7 +267,21 @@ public class DFile extends ManageFile{
     }
 
     @Override
-    public boolean move(Context context, ManageFile manageFile) throws Exception {
+    public ParcelFileDescriptor openFileDescriptor(String mode) throws FileNotFoundException {
+        if(exists() && canRead())
+            return context.getContentResolver().openFileDescriptor(getUri(), mode);
+        return null;
+    }
+
+    @Override
+    public Zip openZipFile() throws IOException {
+        if(exists() && isFile() && canRead())
+            return new ZipInput(openFileDescriptor("r"));
+        return null;
+    }
+
+    @Override
+    public boolean move(Context context, MFile manageFile) throws Exception {
         if(getESPath().equals(manageFile.getESPath())) {
             return false;
         }
@@ -267,7 +292,7 @@ public class DFile extends ManageFile{
     }
 
     @Override
-    public boolean copy(Context context, ManageFile manageFile) throws Exception {
+    public boolean copy(Context context, MFile manageFile) throws Exception {
         if(getESPath().equals(manageFile.getESPath())) {
             return false;
         }

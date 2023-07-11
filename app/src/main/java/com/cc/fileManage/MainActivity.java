@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -84,6 +85,11 @@ public class MainActivity extends BaseActivity {
         // 申请权限
         requestAccess();
         ///
+        new Handler().postDelayed(() -> {
+            new Thread(() -> {
+
+            }).start();
+        }, 500);
     }
 
     /**

@@ -31,7 +31,7 @@ import com.cc.fileManage.databinding.FragmentFileBrowserBinding;
 import com.cc.fileManage.db.DBService;
 import com.cc.fileManage.entity.BookMark;
 import com.cc.fileManage.entity.file.FileApi;
-import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.module.ApplyPermission;
 import com.cc.fileManage.module.file.FileOperations;
 import com.cc.fileManage.task.fileBrowser.FileBrowserLoadTask;
@@ -70,7 +70,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
 
     private boolean pasteState;                     //等待粘贴
     private boolean copyOrMove;                     //复制/粘贴
-    private List<ManageFile> waitCopyFile;          //等待复制/粘贴的文件
+    private List<MFile> waitCopyFile;          //等待复制/粘贴的文件
 
     private FileBrowserAdapter adapter;             //列表数据适配器
 
@@ -94,7 +94,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
             updateFileData(getReadFilePath(), null, false, true);
         }
         else if(openFileIndex != -1){   // 更新某个条目
-            ManageFile manageFile = adapter.getData().size() >
+            MFile manageFile = adapter.getData().size() >
                     openFileIndex ? adapter.getData().get(openFileIndex) : null;
             //被删除
             if(manageFile == null){
@@ -143,10 +143,10 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
                 break;
             case 1000:
                 //show
-                List<ManageFile> files = new ArrayList<>();
-                files.add(ManageFile.create(requireContext(), getReadFilePath()));
+                List<MFile> files = new ArrayList<>();
+                files.add(MFile.create(requireContext(), getReadFilePath()));
                 ///===============
-                SearchFilesTask<ManageFile> searchFilesCallback = new SearchFilesTask<>(getActivity(),
+                SearchFilesTask<MFile> searchFilesCallback = new SearchFilesTask<>(getActivity(),
                         files, CSetting.showHiddenFile);
                 searchFilesCallback.setOnSearchDataListener(this::showDataView);
                 searchFilesCallback.showSearchView("*.*");
@@ -303,7 +303,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
             alertDialog.setPositiveButton("确定", (dialog, which) -> {
                 ////
                 if(waitCopyFile != null && waitCopyFile.size() > 0) {
-                    ManageFile file = ManageFile.create(requireContext(), getReadFilePath());
+                    MFile file = MFile.create(requireContext(), getReadFilePath());
                     ///
                     if(file.exists() && !file.canWrite()) {
                         // 取消状态
@@ -348,7 +348,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
     }
 
     // 获取列表数据
-    public List<ManageFile> getAdapterData() {
+    public List<MFile> getAdapterData() {
         return adapter.getData();
     }
 
@@ -384,7 +384,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
         loadFiles.setOnLoadFilesListener(new FileBrowserLoadTask.OnFileChangeListener(){
             @SuppressLint("NotifyDataSetChanged")
             @Override
-            public void onFilesData(List<ManageFile> data, String showItem) {
+            public void onFilesData(List<MFile> data, String showItem) {
                 //重新设置当前访问的路径
                 setReadFilePath(updatePath);
                 //更新访问的路径
@@ -436,7 +436,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
-    public void onItemClick(ManageFile file, int index) {
+    public void onItemClick(MFile file, int index) {
         //如果是tag
         if(file.isTag()){
             //返回上一级
@@ -476,7 +476,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
     }
 
     @Override
-    public void onItemLongClick(ManageFile file, int index) {
+    public void onItemLongClick(MFile file, int index) {
         if(file.isTag() || pasteState) return;
         ////
         FileOperations fileMethod = new FileOperations(this, file, index);
@@ -488,7 +488,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
      * @param data 数据
      */
     @SuppressLint("SetTextI18n")
-    private void showDataView(List<ManageFile> data)
+    private void showDataView(List<MFile> data)
     {
         //页面
         View view = requireActivity().getLayoutInflater().inflate(R.layout.file_browser,null);
@@ -527,7 +527,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
     }
 
     @Override
-    public void onCheckItem(ManageFile manageFile, int position) {
+    public void onCheckItem(MFile manageFile, int position) {
         if(pasteState) {
             setPasteState(false, false, "", null);
         }
@@ -549,7 +549,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
      * @return 是否可读
      */
     public boolean parentCanRead() {
-        ManageFile file = ManageFile.create(requireContext(), getReadFilePath());
+        MFile file = MFile.create(requireContext(), getReadFilePath());
         /// 父目录是否可读
         return FileApi.isDataDir(file.getParent()) || file.parentCanRead();
     }
@@ -575,9 +575,9 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
      * 获取选中的的文件列表
      * @return 文件集合
      */
-    public List<ManageFile> getCheckFiles(){
-        List<ManageFile> check = new ArrayList<>();
-        for(ManageFile cm : adapter.getData()){
+    public List<MFile> getCheckFiles(){
+        List<MFile> check = new ArrayList<>();
+        for(MFile cm : adapter.getData()){
             if(!cm.isTag() && cm.isCheck())
                 check.add(cm);
         }
@@ -590,7 +590,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
      */
     @SuppressLint("NotifyDataSetChanged")
     public void setFilesCheckState(boolean state){
-        for (ManageFile manageFile : adapter.getData()) {
+        for (MFile manageFile : adapter.getData()) {
             if(manageFile.isTag()){
                 continue;
             }
@@ -613,7 +613,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
     @SuppressLint("NotifyDataSetChanged")
     private void reverseElection(){
         int checkSize = 0;
-        for (ManageFile manageFile : adapter.getData()) {
+        for (MFile manageFile : adapter.getData()) {
             if(manageFile.isTag()){
                 continue;
             }
@@ -724,7 +724,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
         this.openFileIndex = openFileIndex;
     }
 
-    public void setPasteState(boolean pasteState, boolean copyOrMove, String text, ManageFile file) {
+    public void setPasteState(boolean pasteState, boolean copyOrMove, String text, MFile file) {
         this.pasteState = pasteState;
         this.copyOrMove = copyOrMove;
         //////
@@ -888,7 +888,7 @@ public class FileBrowserFragment extends BaseFragment implements FileBrowserAdap
      * @param path  路径
      */
     private void startTo(String path) {
-        ManageFile file = ManageFile.create(requireContext(), path);
+        MFile file = MFile.create(requireContext(), path);
         if(FileApi.isDataDirChild(path) || file.exists()) {
             ////
             if(file.exists()) {

@@ -23,7 +23,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.ObjectKey;
 import com.cc.fileManage.R;
 import com.cc.fileManage.databinding.ActicityPhotoBinding;
-import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.entity.file.MFile;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -93,7 +93,7 @@ public class PhotoActivity extends BaseActivity {
      */
     private void initImageInfo(int index) {
         setToolbarTitle("图片查看器("+(index +1)+"/"+images.size()+")");
-        ManageFile f = ManageFile.create(this, images.get(index));
+        MFile f = MFile.create(this, images.get(index));
         try {
             BitmapFactory.Options bitmapWH = getBitmapWH(f);
             if(bitmapWH.outHeight < 1 || bitmapWH.outWidth < 1) {
@@ -179,7 +179,7 @@ public class PhotoActivity extends BaseActivity {
             // 设置
             try {
                 // 加载图片
-                ManageFile file = ManageFile.create(context, images.get(position));
+                MFile file = MFile.create(context, images.get(position));
                 BitmapFactory.Options bitmapWH = getBitmapWH(file);
                 //
                 Glide.with(getApplicationContext())
@@ -253,7 +253,7 @@ public class PhotoActivity extends BaseActivity {
      * @param f 图片文件
      * @return  图片信息
      */
-    private BitmapFactory.Options getBitmapWH(ManageFile f) {
+    private BitmapFactory.Options getBitmapWH(MFile f) {
         BitmapFactory.Options opts = new BitmapFactory.Options();
         try {
             //设置为true,代表加载器不加载图片,而是把图片的宽高读出来

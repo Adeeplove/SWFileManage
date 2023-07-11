@@ -2,10 +2,15 @@ package com.cc.fileManage.entity.file;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 
 import androidx.annotation.NonNull;
 
+import org.apache.tools.zip.Zip;
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
@@ -14,7 +19,7 @@ import java.util.List;
  * 文件
  * @author sowhat
  */
-public abstract class ManageFile {
+public abstract class MFile {
 
     // 是否是标签
     protected boolean       tag;
@@ -23,7 +28,7 @@ public abstract class ManageFile {
     // 是否高亮
     protected boolean       highlight;
     // 写出文件
-    protected ManageFile    target;
+    protected MFile         target;
     // 是否读取图标
     protected boolean       loadIcon;
 
@@ -33,7 +38,7 @@ public abstract class ManageFile {
      * @param fullPath  文件路径
      * @return          ManageFile
      */
-    public static ManageFile create(Context context, String fullPath) {
+    public static MFile create(Context context, String fullPath) {
         File file = new File(fullPath);
         if(!file.canRead() && FileApi.isAndroidDataDir(file)) {
             return new DFile(context, file,
@@ -46,7 +51,7 @@ public abstract class ManageFile {
      * 创建一个TAG
      * @return          ManageFile
      */
-    public static ManageFile createTag() {
+    public static MFile createTag() {
         return new JFile(true);
     }
 
@@ -66,7 +71,7 @@ public abstract class ManageFile {
     public abstract String getParent();
 
     // 父文件
-    public abstract ManageFile getParentFile();
+    public abstract MFile getParentFile();
 
     // 父文件路径是否可读
     public abstract boolean parentCanRead();
@@ -99,7 +104,7 @@ public abstract class ManageFile {
     public abstract boolean exists();
 
     // listFiles
-    public abstract List<ManageFile> listFiles(boolean showHidden);
+    public abstract List<MFile> listFiles(boolean showHidden);
 
     // 列出子文件
     public abstract void listFiles(Context context, OnFileDataListener listener);
@@ -119,6 +124,9 @@ public abstract class ManageFile {
     // 创建文件夹(包括父目录)
     public abstract boolean mkdirs();
 
+    // 创建文件的父目录(包括文件)
+    public abstract boolean mkdirsF();
+
     // 文件长度 格式字符串
     public abstract String lengthString();
 
@@ -129,10 +137,10 @@ public abstract class ManageFile {
     public abstract boolean rename(String displayName);
 
     // 移动文件至manageFile
-    public abstract boolean move(Context context, ManageFile manageFile) throws Exception;
+    public abstract boolean move(Context context, MFile manageFile) throws Exception;
 
     // 复制文件至manageFile
-    public abstract boolean copy(Context context, ManageFile manageFile) throws Exception;
+    public abstract boolean copy(Context context, MFile manageFile) throws Exception;
 
     // 打开输入流
     public abstract InputStream openInputStream() throws Exception;
@@ -140,12 +148,18 @@ public abstract class ManageFile {
     // 打开输出流
     public abstract OutputStream openOutStream() throws Exception;
 
+    // 打开文件描述符
+    public abstract ParcelFileDescriptor openFileDescriptor(String mode) throws FileNotFoundException;
+
+    // 打开zip压缩包
+    public abstract Zip openZipFile() throws IOException;
+
     //============================================================//
-    public ManageFile getTarget() {
+    public MFile getTarget() {
         return target;
     }
 
-    public void setTarget(ManageFile target) {
+    public void setTarget(MFile target) {
         this.target = target;
     }
 

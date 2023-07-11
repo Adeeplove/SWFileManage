@@ -1,6 +1,5 @@
 package com.cc.fileManage.ui.activity;
 
-import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,15 +10,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.cc.fileManage.databinding.ActivityEditBinding;
-import com.cc.fileManage.entity.file.FileApi;
-import com.cc.fileManage.module.dex.data.DexFile;
-import com.cc.fileManage.module.stream.PositionInputStream;
 import com.cc.fileManage.task.StandardMsgTask;
-import com.cc.fileManage.utils.zip.GeneralZipUtil;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 
 public class EditActivity extends BaseActivity {
 
@@ -81,40 +74,21 @@ public class EditActivity extends BaseActivity {
     private void readFileContent() {
         StandardMsgTask task = new StandardMsgTask(this, new StandardMsgTask.OnCompleteListener() {
             @Override
-            public String doMethod() throws Exception{
-                String suffix = uri.getLastPathSegment().toLowerCase();
-                if(uri.getScheme().equals(ContentResolver.SCHEME_FILE)) {
-                    File file = new File(uri.getPath());
-                    ///
-                    if(file.exists() && file.isFile() && file.canRead()) {
-                        FileInputStream inputStream = new FileInputStream(file);
-                        if(suffix.endsWith(".dex")) {
-                            PositionInputStream stream = PositionInputStream
-                                    .getInstance(GeneralZipUtil.inputStreamToByteArray(inputStream));
-                            ////
-                            DexFile dexFile = new DexFile();
-                            dexFile.parse(stream);
-                            return dexFile.toString();
-                        } else {
-                            return FileApi.readFile(inputStream).toString();
+            public String doMethod() {
+                try {
+                    String suffix = uri.getLastPathSegment().toLowerCase();
+                    if(uri.getScheme().equals(ContentResolver.SCHEME_FILE)) {
+                        File file = new File(uri.getPath());
+                        ///
+                        if(file.exists() && file.isFile() && file.canRead()) {
+//                            FileInputStream inputStream = new FileInputStream(file);
                         }
+                    } else {
+//                        @SuppressLint("Recycle")
+//                        InputStream inputStream = getContentResolver().openInputStream(uri);
                     }
-                } else {
-                    @SuppressLint("Recycle")
-                    InputStream inputStream = getContentResolver().openInputStream(uri);
-                    if(inputStream != null) {
-                        ////
-                        if(suffix.endsWith(".dex")) {
-                            PositionInputStream stream = PositionInputStream
-                                    .getInstance(GeneralZipUtil.inputStreamToByteArray(inputStream));
-                            ////
-                            DexFile dexFile = new DexFile();
-                            dexFile.parse(stream);
-                            return dexFile.toString();
-                        } else {
-                            return FileApi.readFile(inputStream).toString();
-                        }
-                    }
+                } catch (Exception e) {
+                   e.printStackTrace();
                 }
                 return "";
             }

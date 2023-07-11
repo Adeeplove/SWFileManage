@@ -13,7 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.R;
-import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.task.AsynchronousTask;
 
 import java.io.BufferedReader;
@@ -23,14 +23,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchFilesTask<T extends ManageFile> extends AsynchronousTask<String, String, String>
+public class SearchFilesTask<T extends MFile> extends AsynchronousTask<String, String, String>
 {
     private final WeakReference<Context> weakReference;
 
     //搜索的文件数据
     private final List<T> fileData;
     //搜索到的内容
-    private final List<ManageFile> searchData;
+    private final List<MFile> searchData;
 
     ///================
     private boolean searchSubdirectory = true;   //搜索子目录
@@ -217,7 +217,7 @@ public class SearchFilesTask<T extends ManageFile> extends AsynchronousTask<Stri
     /**
      * @param file File 起始文件夹
      */
-    private void filePattern(ManageFile file, String search) {
+    private void filePattern(MFile file, String search) {
         //更新信息
         publishProgress("text", file.getPath());
         publishProgress("size", "已找到: " + searchData.size());
@@ -233,10 +233,10 @@ public class SearchFilesTask<T extends ManageFile> extends AsynchronousTask<Stri
         {
             if(isCancelled()) return;
             //所有子文件
-            List<ManageFile> files = file.listFiles(true);
+            List<MFile> files = file.listFiles(true);
             //不为Null
             if (files != null && files.size() > 0) {
-                for (ManageFile child : files) {
+                for (MFile child : files) {
                     if(child.isDirectory()){
                         if(isCancelled()) return;
                         //是否搜索子目录
@@ -259,7 +259,7 @@ public class SearchFilesTask<T extends ManageFile> extends AsynchronousTask<Stri
      * @param search 搜索内容
      * @param file   文件
      */
-    private void fileIsMatch(String search, ManageFile file){
+    private void fileIsMatch(String search, MFile file){
         if(!searchHiddenFile && file.isHidden()) return;
         //区分大小写
         if(caseSensitive){
@@ -332,7 +332,7 @@ public class SearchFilesTask<T extends ManageFile> extends AsynchronousTask<Stri
     /**
      * 文件是否包含内容
      */
-    private boolean isHaveContent(ManageFile file){
+    private boolean isHaveContent(MFile file){
         try (InputStreamReader reader = new InputStreamReader(file.openInputStream(), StandardCharsets.UTF_8);
              BufferedReader buffered = new BufferedReader(reader)){
             String line;
@@ -348,6 +348,6 @@ public class SearchFilesTask<T extends ManageFile> extends AsynchronousTask<Stri
     }
 
     public interface OnSearchDataListener{
-        void onSearchData(List<ManageFile> files);
+        void onSearchData(List<MFile> files);
     }
 }

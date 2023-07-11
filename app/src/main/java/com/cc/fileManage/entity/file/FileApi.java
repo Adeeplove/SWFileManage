@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
@@ -21,7 +22,6 @@ import com.cc.fileManage.utils.CharUtil;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -51,7 +51,17 @@ public class FileApi {
      * @param context   上下文
      * @param path      文件夹路径
      */
-    public static Uri mkdirs(Context context, String path){
+    public static Uri mkdirs(Context context, String path) {
+        return mkdirs(context, path, false);
+    }
+
+    /**
+     * 创建文件夹
+     * @param context    上下文
+     * @param path       文件夹路径
+     * @param createFile 首文件是否是文件
+     */
+    public static Uri mkdirs(Context context, String path, boolean createFile) {
        Uri childUri = null;
        try {
            List<MethodValue<String, Uri>> documentFiles = new ArrayList<>();
@@ -66,7 +76,11 @@ public class FileApi {
                    Uri value = uriMethodValue.getValueTwo();           //父文件夹uri
                    //创建文件夹
                    if(childUri != null) {
-                       childUri = createDir(context, value, key);
+                       if(createFile && i == 0) {
+                           childUri = createFile(context, value, key);
+                       } else {
+                           childUri = createDir(context, value, key);
+                       }
                    } else {
                        break;
                    }
@@ -89,12 +103,15 @@ public class FileApi {
         if(parent == null) return;
         //获取父目录的uri
         Uri uri = getDocumentUri(parent);
-        //put 要创建的子文件名  父文件uri
-        documentFiles.add(new MethodValue<>(file.getName(), uri));
         //如果父目录不存在或不是文件夹 继续往上层执行
-        if(!exists(context, uri)){
+        if(!exists(context, uri)) {
+            //put 要创建的子文件名  父文件uri
+            documentFiles.add(new MethodValue<>(file.getName(), uri));
             //迭代
             createDocumentFileDirs(context, parent, documentFiles);
+        } else if(!exists(context, getDocumentUri(path))){
+            //put 要创建的子文件名  父文件uri
+            documentFiles.add(new MethodValue<>(file.getName(), uri));
         }
     }
 
@@ -452,7 +469,7 @@ public class FileApi {
                 File file = new File(fullPath, info.packageName);
                 if(file.exists()) {
                     /// 构建对象  type  directory 文件夹
-                    ManageFile manageFile = file.canRead() ? new JFile(file) : new DFile(context, file,
+                    MFile manageFile = file.canRead() ? new JFile(file) : new DFile(context, file,
                             DocumentsContract.Document.MIME_TYPE_DIR, file.lastModified(), 0L);
                     /// 回调
                     listener.onData(manageFile, fullPath);
@@ -506,7 +523,7 @@ public class FileApi {
                 // 迭代
                 while (cursor.moveToNext()) {
                     // 构建对象  type  directory 文件夹
-                    ManageFile manageFile = new DFile(context, filePath,
+                    MFile manageFile = new DFile(context, filePath,
                             cursor.getString(0),
                             cursor.getString(1),
                             cursor.getLong(2),
@@ -724,7 +741,7 @@ public class FileApi {
      * @param sourceFile    源文件
      * @param targetFile    新路径文件
      */
-    public static boolean copyFile(ManageFile sourceFile, ManageFile targetFile) throws Exception{
+    public static boolean copyFile(MFile sourceFile, MFile targetFile) throws Exception{
         // 验证
         if(sourceFile == null || targetFile == null || !sourceFile.exists() || !sourceFile.isFile()) {
             return false;
@@ -753,7 +770,7 @@ public class FileApi {
      * @param sourceFile    源文件夹
      * @param targetFile    目标路径
      */
-    public static void copyDir(Context context, ManageFile sourceFile, ManageFile targetFile) throws Exception{
+    public static void copyDir(Context context, MFile sourceFile, MFile targetFile) throws Exception{
         // 验证
         if(sourceFile == null || targetFile == null || !sourceFile.exists() || !sourceFile.isDirectory()) {
             return;
@@ -762,11 +779,11 @@ public class FileApi {
         if (createOrExistsDir(targetFile)) {
             // 目录路径
             String destPath = targetFile.getPath() + File.separator;
-            List<ManageFile> files = sourceFile.listFiles(true);
+            List<MFile> files = sourceFile.listFiles(true);
             if (files != null && files.size() > 0) {
-                for (ManageFile file : files) {
+                for (MFile file : files) {
                     // 目标文件
-                    ManageFile destFile = ManageFile.create(context, destPath + file.getName());
+                    MFile destFile = MFile.create(context, destPath + file.getName());
                     if (file.isFile()) {
                         // 复制文件
                         copyFile(file, destFile);
@@ -785,7 +802,7 @@ public class FileApi {
      * @return      是否创建成功
      */
     @SuppressWarnings("all")
-    public static boolean createOrExistsDir(ManageFile file) {
+    public static boolean createOrExistsDir(MFile file) {
         return file != null && (file.exists() ? file.isDirectory() : file.mkdirs());
     }
 

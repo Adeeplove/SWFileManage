@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.R;
 import com.cc.fileManage.entity.ImageID;
-import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.ui.views.EllipsizeTextView;
 
 import java.io.File;
@@ -22,7 +22,7 @@ import java.util.List;
 
 public class SearchListAdapter extends RecyclerView.Adapter<SearchListAdapter.ListViewHolder>
 {
-    private List<ManageFile> data;
+    private List<MFile> data;
 
     private String rootPath;
 
@@ -42,12 +42,12 @@ public class SearchListAdapter extends RecyclerView.Adapter<SearchListAdapter.Li
         this.rootPath = rootPath.endsWith(File.separator) ? rootPath : rootPath + File.separator;
     }
 
-    public void setData(List<ManageFile> data)
+    public void setData(List<MFile> data)
     {
         this.data = data;
     }
 
-    public List<ManageFile> getData()
+    public List<MFile> getData()
     {
         return data;
     }
@@ -63,7 +63,7 @@ public class SearchListAdapter extends RecyclerView.Adapter<SearchListAdapter.Li
     @Override
     public void onBindViewHolder(@NonNull ListViewHolder holder, int index)
     {
-        ManageFile cfile = data.get(index);
+        MFile cfile = data.get(index);
         try{
             //设置数据
             holder.name.setText(cfile.getName());
@@ -222,6 +222,6 @@ public class SearchListAdapter extends RecyclerView.Adapter<SearchListAdapter.Li
     }
 
     public interface OnSearchFilesDataListener{
-        void updateView(ManageFile file);
+        void updateView(MFile file);
     }
 }

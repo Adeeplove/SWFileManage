@@ -5,6 +5,7 @@
 #include <cstring>
 #include "android/log.h"
 #include "unistd.h"
+#include <cerrno>
 #include <sys/stat.h>
 
 #define BCDEC_IMPLEMENTATION 1
@@ -102,7 +103,7 @@ Java_com_cc_fileManage_utils_TexFileUtil_read(JNIEnv *env, jclass clazz, jint fd
         // 这是一个存储文件(夹)信息的结构体，其中有文件大小和创建时间、访问时间、修改时间等
         struct stat statBuf{0};
         fstat(fd, &statBuf);
-        LOG_W("文件长度: %lld", statBuf.st_size);
+        LOG_W("文件长度: %lld", (long long )statBuf.st_size);
         //
         //
         size_t buf = sizeof(char) * statBuf.st_size + 1;
@@ -117,6 +118,13 @@ Java_com_cc_fileManage_utils_TexFileUtil_read(JNIEnv *env, jclass clazz, jint fd
         *(text + length) = '\0';
         //
         LOG_W("%s", text);
+        ///
+        char buff3[4];
+        lseek(fd, 0, SEEK_SET);
+        if(read(fd, buff3, 3) > 0) {
+            buff3[3] = '\0';
+            LOG_W("文件第一个字符: %s", buff3);
+        }
         free(text);
     }
 }

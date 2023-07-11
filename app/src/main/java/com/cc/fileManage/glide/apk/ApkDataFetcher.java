@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -17,14 +16,13 @@ import androidx.annotation.NonNull;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
-import com.cc.fileManage.entity.file.FileApi;
 import com.cc.fileManage.entity.file.JFile;
-import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.module.arsc.data.ArscFile;
 import com.cc.fileManage.module.arsc.data.BaseTypeChunk;
 import com.cc.fileManage.module.arsc.data.ResTableTypeInfoChunk;
 import com.cc.fileManage.utils.AXmlUtil;
-import com.cc.fileManage.utils.zip.GeneralZipUtil;
+import com.cc.fileManage.utils.AntZipUtil;
 
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipInput;
@@ -34,15 +32,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import brut.androlib.res.data.ResTable;
-
 public class ApkDataFetcher implements DataFetcher<Bitmap> {
 
-    private final ManageFile file;
+    private final MFile file;
 
     private final Context context;
 
-    public ApkDataFetcher(Context context, ManageFile file) {
+    public ApkDataFetcher(Context context, MFile file) {
         this.context = context;
         this.file = file;
     }
@@ -72,8 +68,7 @@ public class ApkDataFetcher implements DataFetcher<Bitmap> {
                     return drawable2Bitmap(drawable);
                 }
             } else {
-                Uri uri = FileApi.getDocumentUri(file.getPath());
-                return loadIcon(context, uri, file.length());
+//                return loadIcon();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -100,17 +95,16 @@ public class ApkDataFetcher implements DataFetcher<Bitmap> {
     }
 
     // 读取apk信息
-    private Bitmap loadIcon(Context context, Uri uri, long length) {
+    private Bitmap loadIcon() {
         //
-        try (ZipInput zipInput = new ZipInput(context, uri, length)){
+        try (ZipInput zipInput = new ZipInput(file)){
             ZipEntry entry = zipInput.getEntry("AndroidManifest.xml");
             if(entry != null) {
                 InputStream inputStream = zipInput.getInputStream(entry);
                 if(inputStream != null) {
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    ResTable resTable = AXmlUtil.decodeAXmlWithResources(inputStream, outputStream, null);
                     ///
-                    String id = resTable.getSdkInfo().get("icon");
+                    String id = "";
                     if(id != null) {
                         entry = zipInput.getEntry("resources.arsc");
                         String resPath = loadIcon(zipInput.getInputStream(entry), Integer.parseInt(id, 16));
@@ -137,7 +131,7 @@ public class ApkDataFetcher implements DataFetcher<Bitmap> {
         if(inputStream == null) return null;
         ////
         ArscFile arscFile = new ArscFile();
-        arscFile.parse(GeneralZipUtil.inputStreamToByteArray(inputStream));
+        arscFile.parse(AntZipUtil.streamToByteArray(inputStream));
         ////
         List<ResTableTypeInfoChunk> chunkList = new ArrayList<>();
         long pkgId = (resId & 0xff000000L) >> 24;

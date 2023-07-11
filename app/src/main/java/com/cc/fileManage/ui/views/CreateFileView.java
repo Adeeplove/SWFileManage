@@ -10,7 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 
 import com.cc.fileManage.R;
-import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.entity.file.MFile;
 
 import java.io.File;
 
@@ -54,7 +54,7 @@ public class CreateFileView {
             _dialog.dismiss();
             // 判断
             String rootPath = path.endsWith(File.separator) ? path : path + File.separator;
-            ManageFile file = ManageFile.create(context, rootPath + fileName);
+            MFile file = MFile.create(context, rootPath + fileName);
             try {
                 if(isFile ? file.createFile() : file.mkdir()) {
                     if(listener != null) {

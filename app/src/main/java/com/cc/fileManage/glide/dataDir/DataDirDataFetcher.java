@@ -18,16 +18,16 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.cc.fileManage.entity.ImageID;
-import com.cc.fileManage.entity.file.ManageFile;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.utils.CommonUtil;
 
 public class DataDirDataFetcher implements DataFetcher<Bitmap> {
 
-    private final ManageFile file;
+    private final MFile file;
 
     private final Context context;
 
-    public DataDirDataFetcher(Context context, ManageFile file) {
+    public DataDirDataFetcher(Context context, MFile file) {
         this.context = context;
         this.file = file;
     }
