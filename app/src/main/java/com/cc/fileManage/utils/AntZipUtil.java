@@ -64,20 +64,22 @@ public class AntZipUtil {
      * outPath 解压存放路径
      */
     public static void unZip(Context context, Zip zip, String outPath) {
-        try (zip){
+        try (zip) {
             //检查
             String fullPath = outPath.endsWith(File.separator) ? outPath : outPath + File.separator;
+            ///
+//            int numThreads = Runtime.getRuntime().availableProcessors();
+//            CountDownLatch count = new CountDownLatch(numThreads);
+
             //遍历
             Enumeration<ZipEntry> emu = zip.getEntries();
             while(emu.hasMoreElements()) {
                 ZipEntry entry = emu.nextElement();
                 //创建
-                MFile file = MFile.create(context, fullPath + entry.getName());
+                MFile file = MFile.create(context,fullPath + entry.getName());
                 //文件夹
                 if (entry.isDirectory()){
-                    if(!file.exists()) {
-                        file.mkdirs();
-                    }
+                    file.mkdirs();
                 } else {
                     writeToFile(zip.getInputStream(entry), file);
                 }
@@ -94,7 +96,7 @@ public class AntZipUtil {
      * outFolderName 指定解压出来的文件夹父目录名 为null就不创建父目录
      * zipEntry 指定解压压缩包内的文件夹
      */
-    public static void unZipDir(Context context, Zip zip, String outPath, String outEntry){
+    public static void unZipDir(Context context, Zip zip, String outPath, String outEntry) {
         try (zip) {
             // 检查
             String fullPath = outPath.endsWith(File.separator) ? outPath : outPath + File.separator;
@@ -112,13 +114,8 @@ public class AntZipUtil {
                     //
                     MFile file = MFile.create(context, fullPath + dir);
                     if(entry.isDirectory()) {
-                        if(!file.exists()) {
-                            file.mkdirs();
-                        }
+                        file.mkdirs();
                     } else {
-                        if (!file.exists()) {
-                            file.mkdirsF();
-                        }
                         //写出
                         writeToFile(zip.getInputStream(entry), file);
                     }
@@ -146,9 +143,6 @@ public class AntZipUtil {
             ZipEntry entry = zip.getEntry(outEntry);
             if (entry != null) {
                 MFile file = MFile.create(context, fullPath + getEntryName(entry.getName()));
-                if (!file.exists()) {
-                    file.mkdirsF();
-                }
                 writeToFile(zip.getInputStream(entry), file);
             }
         } catch (Exception e) {
@@ -234,10 +228,9 @@ public class AntZipUtil {
             MFile file = MFile.create(context, filePath);   // 要被压缩的文件夹
             ////
             MFile zip = MFile.create(context, zipPath);
+            ///
             MFile parent = zip.getParentFile();
-            if(parent != null && !parent.exists()){
-                parent.mkdirs();
-            }
+            parent.mkdirs();
             ////
             try (ZipOutputStream zipOut = new ZipOutputStream(zip.openOutStream())) {
                 if(file.isDirectory()) {
@@ -251,7 +244,6 @@ public class AntZipUtil {
                                 recursionZip(context, zipOut, child, "");
                             }
                         }
-
                         @Override
                         public void onNoPermission() {}
                         @Override

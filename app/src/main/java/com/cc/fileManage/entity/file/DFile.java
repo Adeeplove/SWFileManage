@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 
 import com.blankj.utilcode.util.UriUtils;
+import com.cc.fileManage.utils.CharUtil;
 
 import org.apache.tools.zip.Zip;
 import org.apache.tools.zip.ZipInput;
@@ -202,23 +203,32 @@ public class DFile extends MFile {
     }
 
     @Override
-    public boolean createFile() throws Exception{
+    public boolean createFile() throws Exception {
+        if(!CharUtil.isValidFileName(getName())) {
+            throw new Exception("文件名不合法!");
+        }
         return FileApi.createFile(context, getParent(), getName()) != null;
     }
 
     @Override
-    public boolean mkdir() throws Exception{
+    public boolean createFiles() throws Exception {
+        if(!CharUtil.isValidFileName(getName())) {
+            throw new Exception("文件名不合法!");
+        }
+        return FileApi.mkdirs(context, getPath(), true);
+    }
+
+    @Override
+    public boolean mkdir() throws Exception {
+        if(!CharUtil.isValidFileName(getName())) {
+            throw new Exception("文件名不合法!");
+        }
         return FileApi.createDir(context, getParent(), getName()) != null;
     }
 
     @Override
     public boolean mkdirs() {
-        return FileApi.mkdirs(context, getPath()) != null;
-    }
-
-    @Override
-    public boolean mkdirsF() {
-        return FileApi.mkdirs(context, getPath(), true) != null;
+        return FileApi.mkdirs(context, getPath(), false);
     }
 
     @Override
@@ -251,19 +261,23 @@ public class DFile extends MFile {
 
     @Override
     public InputStream openInputStream() throws Exception {
-        if(exists() && canRead())
-            return context.getContentResolver().openInputStream(getUri());
-        return null;
+        if(exists() && isFile()) {
+            if(canRead()) {
+                return context.getContentResolver().openInputStream(getUri());
+            }
+            throw new IOException("读文件失败");
+        }
+        throw new IOException("文件不存在");
     }
 
     @Override
     public OutputStream openOutStream() throws Exception {
         if(exists()) {
             return context.getContentResolver().openOutputStream(getUri());
-        } else if(createFile()){
+        } else if(createFiles()){
             return context.getContentResolver().openOutputStream(getUri());
         }
-        return null;
+        throw new IOException("文件不存在");
     }
 
     @Override

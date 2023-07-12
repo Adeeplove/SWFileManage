@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -23,10 +24,12 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.cc.fileManage._static.CSetting;
 import com.cc.fileManage.databinding.ActivityMainBinding;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.module.ApplyPermission;
 import com.cc.fileManage.ui.activity.BaseActivity;
 import com.cc.fileManage.ui.browser.FileBrowserFragment;
 import com.cc.fileManage.ui.views.RenameFileView;
+import com.cc.fileManage.utils.AntZipUtil;
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
@@ -78,18 +81,11 @@ public class MainActivity extends BaseActivity {
     }
 
     // 初始化一些数据
-    @SuppressLint("Recycle")
     private void initData() {
         // 点击事件
         setSubtitleClick();
         // 申请权限
         requestAccess();
-        ///
-        new Handler().postDelayed(() -> {
-            new Thread(() -> {
-
-            }).start();
-        }, 500);
     }
 
     /**

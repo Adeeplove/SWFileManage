@@ -11,13 +11,9 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
-
-import com.cc.fileManage.entity.MethodValue;
-import com.cc.fileManage.utils.CharUtil;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -31,6 +27,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class FileApi {
@@ -48,70 +45,50 @@ public class FileApi {
 
     /**
      * 创建文件夹
-     * @param context   上下文
-     * @param path      文件夹路径
-     */
-    public static Uri mkdirs(Context context, String path) {
-        return mkdirs(context, path, false);
-    }
-
-    /**
-     * 创建文件夹
      * @param context    上下文
      * @param path       文件夹路径
      * @param createFile 首文件是否是文件
      */
-    public static Uri mkdirs(Context context, String path, boolean createFile) {
-       Uri childUri = null;
+    public static boolean mkdirs(Context context, String path, boolean createFile) {
        try {
-           List<MethodValue<String, Uri>> documentFiles = new ArrayList<>();
+           LinkedList<MFile> documentFiles = new LinkedList<>();
            // 迭代
-           createDocumentFileDirs(context, path, documentFiles);
-           //
+           createDocumentFileDirs(MFile.create(context, path), documentFiles);
+           // 遍历
            if(documentFiles.size() > 0) {
-               childUri = documentFiles.get(0).getValueTwo();
-               for (int i = documentFiles.size() - 1; i >= 0; i--){
-                   MethodValue<String, Uri> uriMethodValue = documentFiles.get(i);
-                   String key = uriMethodValue.getValueOne();          //文件夹名
-                   Uri value = uriMethodValue.getValueTwo();           //父文件夹uri
-                   //创建文件夹
-                   if(childUri != null) {
-                       if(createFile && i == 0) {
-                           childUri = createFile(context, value, key);
+               MFile file;
+               while ((file = documentFiles.pollLast()) != null) {
+                   if(documentFiles.size() < 1) {
+                       if(createFile) {
+                           return file.createFile();
                        } else {
-                           childUri = createDir(context, value, key);
+                           return file.mkdir();
                        }
-                   } else {
-                       break;
+                   } else if(!file.mkdir()){
+                       return false;
                    }
                }
+           } else {
+               return true;
            }
        } catch (Exception e){
            e.printStackTrace();
        }
-       return childUri;
+       return false;
     }
 
     /**
-     *   递归获取需要创建的父路径
+     * 递归获取需要创建的父路径
+     * @param file              目录
+     * @param documentFiles     链表
      */
-    private static void createDocumentFileDirs(Context context, String path, List<MethodValue<String, Uri>> documentFiles) {
-        //当前文件
-        File file = new File(path);
-        // 父路径是否为空
-        String parent = file.getParent();
-        if(parent == null) return;
-        //获取父目录的uri
-        Uri uri = getDocumentUri(parent);
-        //如果父目录不存在或不是文件夹 继续往上层执行
-        if(!exists(context, uri)) {
-            //put 要创建的子文件名  父文件uri
-            documentFiles.add(new MethodValue<>(file.getName(), uri));
-            //迭代
-            createDocumentFileDirs(context, parent, documentFiles);
-        } else if(!exists(context, getDocumentUri(path))){
-            //put 要创建的子文件名  父文件uri
-            documentFiles.add(new MethodValue<>(file.getName(), uri));
+    private static void createDocumentFileDirs(MFile file, LinkedList<MFile> documentFiles) {
+        // 文件是否存在
+        if(file != null && !file.exists()) {
+            // 添加
+            documentFiles.offer(file);
+            // 递归
+            createDocumentFileDirs(file.getParentFile(), documentFiles);
         }
     }
 
@@ -141,12 +118,8 @@ public class FileApi {
         if(!TextUtils.isEmpty(fileName)){
             Uri fileUri = Uri.parse(uri.toString() + "%2F" + fileName);
             if(exists(context, fileUri)){
-                throw new Exception("文件夹已存在!");
+                return fileUri;
             }
-        }
-        /// 文件名是否合法
-        if(!CharUtil.isValidFileName(fileName)) {
-            throw new Exception("文件名不合法!");
         }
         //
         return DocumentsContract.createDocument(context.getContentResolver(),
@@ -184,12 +157,8 @@ public class FileApi {
         if(!TextUtils.isEmpty(dirName)){
             Uri fileUri = Uri.parse(uri.toString() + "%2F" + dirName);
             if(exists(context, fileUri)){
-                throw new Exception("文件已存在!");
+                return fileUri;
             }
-        }
-        /// 文件名是否合法
-        if(!CharUtil.isValidFileName(dirName)) {
-            throw new Exception("文件名不合法!");
         }
         return DocumentsContract.createDocument(context.getContentResolver(),
                 uri, DocumentsContract.Document.MIME_TYPE_DIR, dirName);

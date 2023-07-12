@@ -202,13 +202,29 @@ public class JFile extends MFile {
 
     @Override
     public boolean createFile() throws Exception {
-        if(file.exists()) {
-            throw new Exception("文件已存在!");
+        if(!file.exists()) {
+            if(!CharUtil.isValidFileName(getName())) {
+                throw new Exception("文件名不合法!");
+            }
+            return file.createNewFile();
         }
-        if(!CharUtil.isValidFileName(getName())) {
-            throw new Exception("文件名不合法!");
+        return true;
+    }
+
+    @Override
+    public boolean createFiles() throws Exception {
+        if(!file.exists()) {
+            if(!CharUtil.isValidFileName(getName())) {
+                throw new Exception("文件名不合法!");
+            }
+            MFile f = getParentFile();
+            if(!f.exists() && f.mkdirs()) {
+                return file.createNewFile();
+            } else {
+                return file.createNewFile();
+            }
         }
-        return file.createNewFile();
+        return true;
     }
 
     @Override
@@ -228,16 +244,6 @@ public class JFile extends MFile {
     }
 
     @Override
-    public boolean mkdirsF() {
-        try {
-            return createFile();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    @Override
     public String lengthString() {
         return FileApi.sizeToString(length());
     }
@@ -249,12 +255,23 @@ public class JFile extends MFile {
 
     @Override
     public InputStream openInputStream() throws Exception {
-        return new FileInputStream(file);
+        if(file.exists() && file.isFile()) {
+            if(file.canRead()) {
+                return new FileInputStream(file);
+            }
+            throw new IOException("读文件失败");
+        }
+        throw new IOException("文件不存在");
     }
 
     @Override
     public OutputStream openOutStream() throws Exception {
-        return new FileOutputStream(file);
+        if(file.exists()) {
+            return new FileOutputStream(file);
+        } else if(createFiles()) {
+            return new FileOutputStream(file);
+        }
+        throw new IOException("文件不存在");
     }
 
     @Override

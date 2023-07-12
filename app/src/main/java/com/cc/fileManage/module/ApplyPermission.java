@@ -20,7 +20,6 @@ public class ApplyPermission {
     public static final int ANDROID_DATA = 1001;
 
     /**
-     *
      * @param tree 文件夹
      * @return     字符串
      */

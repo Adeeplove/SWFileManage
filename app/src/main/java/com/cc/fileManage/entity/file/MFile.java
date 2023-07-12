@@ -36,7 +36,7 @@ public abstract class MFile {
      * 创建一个空白文件
      * @param context   上下文
      * @param fullPath  文件路径
-     * @return          ManageFile
+     * @return          MFile
      */
     public static MFile create(Context context, String fullPath) {
         File file = new File(fullPath);
@@ -54,6 +54,7 @@ public abstract class MFile {
     public static MFile createTag() {
         return new JFile(true);
     }
+
 
     // 文件名称
     public abstract String getName();
@@ -118,14 +119,14 @@ public abstract class MFile {
     // 创建文件
     public abstract boolean createFile() throws Exception;
 
+    // 创建文件(包括父目录)
+    public abstract boolean createFiles() throws Exception;
+
     // 创建文件夹
     public abstract boolean mkdir() throws Exception;
 
     // 创建文件夹(包括父目录)
     public abstract boolean mkdirs();
-
-    // 创建文件的父目录(包括文件)
-    public abstract boolean mkdirsF();
 
     // 文件长度 格式字符串
     public abstract String lengthString();
@@ -136,10 +137,10 @@ public abstract class MFile {
     // 重命名
     public abstract boolean rename(String displayName);
 
-    // 移动文件至manageFile
+    // 移动文件至MFile
     public abstract boolean move(Context context, MFile manageFile) throws Exception;
 
-    // 复制文件至manageFile
+    // 复制文件至MFile
     public abstract boolean copy(Context context, MFile manageFile) throws Exception;
 
     // 打开输入流
