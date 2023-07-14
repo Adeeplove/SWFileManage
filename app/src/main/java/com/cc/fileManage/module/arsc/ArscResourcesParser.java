@@ -29,36 +29,36 @@ public class ArscResourcesParser {
                 try (ZipFile zip = new ZipFile(fileName)) {
                     ZipEntry amz;
                     amz = zip.getEntry("resources.arsc");
-                    try (InputStream amis = zip.getInputStream(amz)) {
-                        int BUFFER_SIZE = (int) (amz.getSize() > 51200 ? 51200 : amz.getSize());
-                        byte[] buf = new byte[BUFFER_SIZE];
-                        int bytesRead = amis.read(buf);
-                        ArscFile arscFile = new ArscFile();
-                        arscFile.parse(buf);
-                        xml = arscFile.buildPublicXml();
-                    }
+//                    try (InputStream amis = zip.getInputStream(amz)) {
+//                        int BUFFER_SIZE = (int) (amz.getSize() > 51200 ? 51200 : amz.getSize());
+//                        byte[] buf = new byte[BUFFER_SIZE];
+//                        int bytesRead = amis.read(buf);
+//                        ArscFile arscFile = new ArscFile();
+//                        arscFile.parse(buf);
+//                        xml = arscFile.buildPublicXml();
+//                    }
                 }
             } else if (fileName.endsWith(".arsc")) {
-                File file = new File(fileName);
-                FileInputStream fin = new FileInputStream(file);
-                byte[] buf = new byte[(int) file.length()];
-                fin.read(buf);
-                ArscFile arscFile = new ArscFile();
-                arscFile.parse(buf);
-                xml = arscFile.buildPublicXml();
-                fin.close();
+//                File file = new File(fileName);
+//                FileInputStream fin = new FileInputStream(file);
+//                byte[] buf = new byte[(int) file.length()];
+//                fin.read(buf);
+//                ArscFile arscFile = new ArscFile();
+//                arscFile.parse(buf);
+//                xml = arscFile.buildPublicXml();
+//                fin.close();
                 
                 // testing
                 int resId = 0x7f030001;
                 short packageId = (short) (resId >> 24 & 0xff);
                 short typeId = (short) ((resId >> 16) & 0xff);
                 int entryIndex = (int) (resId & 0xffff);
-                ResTableEntry res = arscFile.getResource(resId);
-                if (res != null) {
-                    System.out.println(res);
-                } else {
-                    System.out.println("Resource ID 0x" + String.format("%04x", resId) + " cannot be found.");
-                }
+//                ResTableEntry res = arscFile.getResource(resId);
+//                if (res != null) {
+//                    System.out.println(res);
+//                } else {
+//                    System.out.println("Resource ID 0x" + String.format("%04x", resId) + " cannot be found.");
+//                }
                 
             } else {
                 xml = "Non valide file.";

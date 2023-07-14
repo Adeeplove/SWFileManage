@@ -6,19 +6,18 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.cc.fileManage.entity.TEXFile;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.module.file.TEXCreator;
 import com.cc.fileManage.task.AsynchronousTask;
 import com.cc.fileManage.utils.TexFileUtil;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.lang.ref.WeakReference;
 
 public class ConvertTexTask extends AsynchronousTask<String, String, Boolean> {
 
     private final WeakReference<Context> weakReference;
 
-    private final File file;        //tex文件
+    private final MFile file;        //tex文件
     //格式
     private TEXFile.PixelFormat PixelFormat;
     //类型
@@ -31,7 +30,7 @@ public class ConvertTexTask extends AsynchronousTask<String, String, Boolean> {
     //弹框
     private ProgressDialog dialog;
 
-    public ConvertTexTask(Context context, File file){
+    public ConvertTexTask(Context context, MFile file){
         this.weakReference = new WeakReference<>(context);
         this.file = file;
     }
@@ -67,37 +66,39 @@ public class ConvertTexTask extends AsynchronousTask<String, String, Boolean> {
 
     @Override
     protected Boolean doInBackground(String... strings) {
-        Bitmap bitmap = null;
-        if(file.getName().endsWith(".tex")){
-            TEXFile tex = TexFileUtil.openTexFile(file);
-            if(tex != null){
-                bitmap = TexFileUtil.loadTexBitmap(tex);
+        Context context = weakReference.get();
+        if(context != null) {
+            Bitmap bitmap = null;
+            if(file.getName().endsWith(".tex")){
+                TEXFile tex = TexFileUtil.openTexFile(file);
+                if(tex != null){
+                    bitmap = TexFileUtil.loadTexBitmap(tex);
+                }
+            } else {
+                bitmap = BitmapFactory.decodeFile(file.getPath());
             }
-        }else {
-            bitmap = BitmapFactory.decodeFile(file.getPath());
-        }
-        //===================
-        if(bitmap == null){
-            return false;
-        }
-        //====
-        FileOutputStream fo;
-        try{
-            String name = file.getName();
-            if(name.lastIndexOf(".") != -1){
-                name = name.substring(0, name.lastIndexOf("."));
+            //===================
+            if(bitmap == null){
+                return false;
             }
-            String outFile = file.getParent() + "/" + name + "_" + PixelFormat.getName() +".tex";
-            fo = new FileOutputStream(outFile);
+            //====
+            try {
+                String name = file.getName();
+                if(name.lastIndexOf(".") != -1){
+                    name = name.substring(0, name.lastIndexOf("."));
+                }
+                String outFile = file.getParent() + "/" + name + "_" + PixelFormat.getName() +".tex";
+                MFile fil = MFile.create(context, outFile);
 
-            TEXCreator tc = new TEXCreator(PixelFormat, TextureType);
-            tc.setGenerateMipmaps(GenerateMipmaps);
-            tc.setPreMultiplyAlpha(preMultiplyAlpha);
-            //error
-            tc.convertPNGToTex(bitmap, fo);
-            return true;
-        }catch (Exception e){
-            e.printStackTrace();
+                TEXCreator tc = new TEXCreator(PixelFormat, TextureType);
+                tc.setGenerateMipmaps(GenerateMipmaps);
+                tc.setPreMultiplyAlpha(preMultiplyAlpha);
+                //error
+                tc.convertPNGToTex(bitmap, fil.openOutStream());
+                return true;
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
         return false;
     }

@@ -32,15 +32,15 @@ import java.util.List;
 public class FileBrowserAdapter extends RecyclerView.Adapter<FileBrowserAdapter.BrowserViewHolder>
         implements FileItemTouchHelperCallback.ItemTouchHelperListener
 {
-    private final Context context;
+    private final Context       context;
     //数据
-    private List<MFile> data;
+    private List<MFile>         data;
     //高亮的item index
-    private int              highlightIndex;
+    private int                 highlightIndex;
     //监听
     private OnItemClickListener onItemClickListener;
     //是否是暗黑模式
-    private final boolean isUiMode;
+    private final boolean       isUiMode;
 
     @SuppressLint("ResourceAsColor")
     public FileBrowserAdapter(Context context){

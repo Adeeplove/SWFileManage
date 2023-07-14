@@ -1,5 +1,6 @@
 package com.cc.fileManage.module.arsc.data;
 
+import com.cc.fileManage.module.stream.BoundedInputStream;
 import com.cc.fileManage.module.stream.Utils;
 import com.cc.fileManage.module.stream.PositionInputStream;
 
@@ -17,9 +18,9 @@ public class ResTableRef {
 
     public long ident;
 
-    public static ResTableRef parseFrom(PositionInputStream mStreamer) throws IOException {
+    public static ResTableRef parseFrom(BoundedInputStream stream) throws IOException {
         ResTableRef ref = new ResTableRef();
-        ref.ident = Utils.readInt(mStreamer);
+        ref.ident = stream.readIntLow();
         return ref;
     }
 

@@ -1,7 +1,6 @@
 package com.cc.fileManage.module.arsc.data;
 
-import com.cc.fileManage.module.stream.Utils;
-import com.cc.fileManage.module.stream.PositionInputStream;
+import com.cc.fileManage.module.stream.BoundedInputStream;
 
 import java.io.IOException;
 
@@ -51,76 +50,74 @@ public class ResTableConfig {
     public byte[] localeScript;   // 4
     public byte[] localeVariant;  // 8
 
-    public static ResTableConfig parseFrom(PositionInputStream mStreamer) throws IOException {
+    public static ResTableConfig parseFrom(BoundedInputStream stream) throws IOException {
         ResTableConfig config = new ResTableConfig();
-        long cursor = mStreamer.getPosition();
+        long cursor = stream.getPointer();
         long start = cursor;
 
-        config.size = Utils.readInt(mStreamer);
+        config.size = stream.readIntLow();
         cursor += 4;
 
-        config.mcc = Utils.readShort(mStreamer);
-        config.mnc = Utils.readShort(mStreamer);
-        mStreamer.seek(cursor);     // Reset cursor to get union value.
-        config.imsi = Utils.readInt(mStreamer);
+        config.mcc = stream.readShortLow();
+        config.mnc = stream.readShortLow();
+        stream.seek(cursor);     // Reset cursor to get union value.
+        config.imsi = stream.readIntLow();
         cursor += 4;
 
-        config.language = Utils.readShort(mStreamer);
-        config.country = Utils.readShort(mStreamer);
-        mStreamer.seek(cursor);
-        config.locale = Utils.readInt(mStreamer);
+        config.language = stream.readShortLow();
+        config.country = stream.readShortLow();
+        stream.seek(cursor);
+        config.locale = stream.readIntLow();
         cursor += 4;
 
-        config.orientation = Utils.readUInt8(mStreamer);
-        config.touchScreen = Utils.readUInt8(mStreamer);
-        config.density = Utils.readShort(mStreamer);
-        mStreamer.seek(cursor);
-        config.screenType = Utils.readInt(mStreamer);
+        config.orientation = stream.readUInt8();
+        config.touchScreen = stream.readUInt8();
+        config.density = stream.readShortLow();
+        stream.seek(cursor);
+        config.screenType = stream.readIntLow();
         cursor += 4;
 
-        config.keyboard = Utils.readUInt8(mStreamer);
-        config.navigation = Utils.readUInt8(mStreamer);
-        config.inputFlags = Utils.readUInt8(mStreamer);
-        config.inputPad0 = Utils.readUInt8(mStreamer);
-        mStreamer.seek(cursor);
-        config.input = Utils.readInt(mStreamer);
+        config.keyboard = stream.readUInt8();
+        config.navigation = stream.readUInt8();
+        config.inputFlags = stream.readUInt8();
+        config.inputPad0 = stream.readUInt8();
+        stream.seek(cursor);
+        config.input = stream.readIntLow();
         cursor += 4;
 
-        config.screenWidth = Utils.readShort(mStreamer);
-        config.screenHeight = Utils.readShort(mStreamer);
-        mStreamer.seek(cursor);
-        config.screenSize = Utils.readInt(mStreamer);
+        config.screenWidth = stream.readShortLow();
+        config.screenHeight = stream.readShortLow();
+        stream.seek(cursor);
+        config.screenSize = stream.readIntLow();
         cursor += 4;
 
-        config.sdkVersion = Utils.readShort(mStreamer);
-        config.minorVersion = Utils.readShort(mStreamer);
-        mStreamer.seek(cursor);
-        config.version = Utils.readInt(mStreamer);
+        config.sdkVersion = stream.readShortLow();
+        config.minorVersion = stream.readShortLow();
+        stream.seek(cursor);
+        config.version = stream.readIntLow();
         cursor += 4;
 
-        config.screenLayout = Utils.readUInt8(mStreamer);
-        config.uiModeByte = Utils.readUInt8(mStreamer);
-        config.smallestScreenWidthDp = Utils.readShort(mStreamer);
-        mStreamer.seek(cursor);
-        config.screenConfig = Utils.readInt(mStreamer);
+        config.screenLayout = stream.readUInt8();
+        config.uiModeByte = stream.readUInt8();
+        config.smallestScreenWidthDp = stream.readShortLow();
+        stream.seek(cursor);
+        config.screenConfig = stream.readIntLow();
         cursor += 4;
 
-        config.screenWidthDp = Utils.readShort(mStreamer);
-        config.screenHeightDp = Utils.readShort(mStreamer);
-        mStreamer.seek(cursor);
-        config.screenSizeDp = Utils.readInt(mStreamer);
-        cursor += 4;
+        config.screenWidthDp = stream.readShortLow();
+        config.screenHeightDp = stream.readShortLow();
+        stream.seek(cursor);
+        config.screenSizeDp = stream.readIntLow();
         {
             byte[] buf;
             buf = new byte[4];
-            mStreamer.read(buf);
+            stream.read(buf);
             config.localeScript = buf;
             buf = new byte[8];
-            mStreamer.read(buf);
+            stream.read(buf);
             config.localeVariant = buf;
         }
-
-        mStreamer.seek(start + config.size);
+        stream.seek(start + config.size);
         return config;
     }
 

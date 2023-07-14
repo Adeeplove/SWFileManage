@@ -1,5 +1,6 @@
 package com.cc.fileManage.module.arsc.data;
 
+import com.cc.fileManage.module.stream.BoundedInputStream;
 import com.cc.fileManage.module.stream.Utils;
 import com.cc.fileManage.module.stream.PositionInputStream;
 
@@ -22,17 +23,17 @@ public class ResTableTypeSpecChunk extends BaseTypeChunk {
     public long entryCount;
     public long[] entryConfig;
 
-    public static ResTableTypeSpecChunk parseFrom(PositionInputStream mStreamer, ResStringPoolChunk stringChunk) throws IOException {
+    public static ResTableTypeSpecChunk parseFrom(BoundedInputStream stream, ResStringPoolChunk stringChunk) throws IOException {
         ResTableTypeSpecChunk chunk = new ResTableTypeSpecChunk();
-        chunk.header = ChunkHeader.parseFrom(mStreamer);
-        chunk.typeId = Utils.readUInt8(mStreamer);
-        chunk.res0 = Utils.readUInt8(mStreamer);
-        chunk.res1 = Utils.readShort(mStreamer);
-        chunk.entryCount = Utils.readInt(mStreamer);
+        chunk.header = ChunkHeader.parseFrom(stream);
+        chunk.typeId = stream.readUInt8();
+        chunk.res0 = stream.readUInt8();
+        chunk.res1 = stream.readShortLow();
+        chunk.entryCount = stream.readIntLow();
         chunk.entryConfig = new long[(int) chunk.entryCount];
 
         for (int i=0; i<chunk.entryCount; ++i) {
-            chunk.entryConfig[i] = Utils.readInt(mStreamer);
+            chunk.entryConfig[i] = stream.readIntLow();
         }
         return chunk;
     }

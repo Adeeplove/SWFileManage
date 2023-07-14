@@ -2,9 +2,8 @@ package com.cc.fileManage.module.arsc.data;
 
 import androidx.annotation.NonNull;
 
-import com.cc.fileManage.module.stream.PositionInputStream;
-
-import java.io.ByteArrayInputStream;
+import com.cc.fileManage.module.stream.BoundedInputStream;
+import com.cc.fileManage.module.stream.RandomInputStream;
 
 import java.io.IOException;
 
@@ -23,56 +22,54 @@ public class ArscFile {
     private static final int RES_STRING_POOL_TYPE = 0x0001;
     private static final int RES_TABLE_PACKAGE_TYPE = 0x0200;
 
-    private ByteArrayInputStream mStreamer;
     public ResFileHeaderChunk arscHeader;
     public ResStringPoolChunk resStringPoolChunk;
     public ResTablePackageChunk resTablePackageChunk;
+    //
+    private final RandomInputStream stream;
 
-    public ArscFile() {}
+    public ArscFile(RandomInputStream stream) {
+        this.stream = stream;
+    }
 
-    public void parse(byte[] sBuf) throws IOException {
-        mStreamer = new ByteArrayInputStream(sBuf);
+    public void parse() throws IOException {
+        long length = stream.length();
 
-        byte[] headBytes;
-        byte[] chunkBytes;
-        long cursor = 0;
-        ChunkHeader header;
-
-        // Preload file header. The chunkSize represents the complete file length.
-        chunkBytes = new byte[ResFileHeaderChunk.LENGTH];
-        mStreamer.read(chunkBytes, 0, chunkBytes.length);
-        header = ChunkHeader.parseFrom(new PositionInputStream(new ByteArrayInputStream(chunkBytes)));
+        ChunkHeader header = ChunkHeader.parseFrom(getInputStream(0, ResFileHeaderChunk.LENGTH));
+        ////
         if (header.type != RES_TABLE_TYPE) {
             return;
         }
         // Post load file header.
-        mStreamer.reset();
-        chunkBytes = new byte[header.headerSize];
-        cursor += mStreamer.read(chunkBytes, 0, chunkBytes.length);
-        arscHeader = ResFileHeaderChunk.parseFrom(new PositionInputStream(new ByteArrayInputStream(chunkBytes)));
-
+        stream.reset();
+        ///
+        BoundedInputStream bound = getInputStream(0, header.headerSize);
+        arscHeader = ResFileHeaderChunk.parseFrom(bound);
+        bound.skipRemaining();
+        //
         do {
-            headBytes = new byte[ChunkHeader.LENGTH];
-            cursor += mStreamer.read(headBytes, 0, headBytes.length);
-            header = ChunkHeader.parseFrom(new PositionInputStream(new ByteArrayInputStream(headBytes)));
-
-            // Chunk size = ChunkInfo + BodySize
-            chunkBytes = new byte[(int) header.chunkSize];
-            System.arraycopy(headBytes, 0, chunkBytes, 0, ChunkHeader.LENGTH);
-            cursor += mStreamer.read(chunkBytes, ChunkHeader.LENGTH, (int) header.chunkSize - ChunkHeader.LENGTH);
-            //LogUtil.i(TAG, header.toRowString().replace("\n", ""), "cursor=0x" + PrintUtil.hex4(cursor));
-
+            stream.markNow();
+            header = ChunkHeader.parseFrom(getInputStream(stream.getPointer(), ChunkHeader.LENGTH));
+            stream.reset();
+            ///
             switch (header.type) {
                 case RES_STRING_POOL_TYPE:
-                    resStringPoolChunk = ResStringPoolChunk.parseFrom(new PositionInputStream(new ByteArrayInputStream(chunkBytes)));
+                    long pos = stream.getPointer();
+                    bound = getInputStream(pos, header.chunkSize);
+                    //
+                    resStringPoolChunk = ResStringPoolChunk.parseFrom(bound);
+                    bound.skipRemaining();
                     break;
                 case RES_TABLE_PACKAGE_TYPE:
-                    resTablePackageChunk = ResTablePackageChunk.parseFrom(new PositionInputStream(new ByteArrayInputStream(chunkBytes)), resStringPoolChunk);
+                    long p = stream.getPointer();
+                    bound = getInputStream(p, header.chunkSize);
+                    ///
+                    resTablePackageChunk = ResTablePackageChunk.parseFrom(bound, resStringPoolChunk);
+                    bound.skipRemaining();
                     break;
                 default:
             }
-
-        } while (cursor < sBuf.length);
+        } while (stream.getPointer() < length);
     }
 
     @NonNull
@@ -97,9 +94,13 @@ public class ArscFile {
         }
     }
 
+    private BoundedInputStream getInputStream(long start, long remaining) {
+        return new BoundedInputStream(stream, start, remaining);
+    }
+
     public void close() {
         try {
-            if(mStreamer != null) mStreamer.close();
+            if(stream != null) stream.close();
         } catch (Exception ignored) {}
     }
 }

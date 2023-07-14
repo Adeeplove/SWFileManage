@@ -1,10 +1,8 @@
 package com.cc.fileManage.module.arsc.data;
 
-import com.cc.fileManage.module.stream.Utils;
-import com.cc.fileManage.module.stream.PositionInputStream;
+import com.cc.fileManage.module.stream.BoundedInputStream;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,40 +39,42 @@ public class ResTablePackageChunk {
     // Create Index
     public Map<Integer, List<BaseTypeChunk>> typeInfoIndexer;
 
-    public static ResTablePackageChunk parseFrom(PositionInputStream mStreamer, ResStringPoolChunk stringChunk) throws IOException {
+    public static ResTablePackageChunk parseFrom(BoundedInputStream stream, ResStringPoolChunk stringChunk) throws IOException {
+        long baseCursor = stream.getPointer();
+        //
         ResTablePackageChunk chunk = new ResTablePackageChunk();
-        chunk.header = ChunkHeader.parseFrom(mStreamer);
-        chunk.pkgId = Utils.readInt(mStreamer);
-        chunk.packageName = Utils.readString16(mStreamer, 128 * 2);
-        chunk.typeStringOffset = Utils.readInt(mStreamer);
-        chunk.lastPublicType = Utils.readInt(mStreamer);
-        chunk.keyStringOffset = Utils.readInt(mStreamer);
-        chunk.lastPublicKey = Utils.readInt(mStreamer);
+        chunk.header = ChunkHeader.parseFrom(stream);
+        chunk.pkgId = stream.readIntLow();
+        chunk.packageName = stream.readString16(128 * 2);
+        chunk.typeStringOffset = stream.readIntLow();
+        chunk.lastPublicType = stream.readIntLow();
+        chunk.keyStringOffset = stream.readIntLow();
+        chunk.lastPublicKey = stream.readIntLow();
 
         // Data Block
-        mStreamer.seek(chunk.typeStringOffset);
-        chunk.typeStringPool = ResStringPoolChunk.parseFrom(mStreamer);
-        mStreamer.seek(chunk.keyStringOffset);
-        chunk.keyStringPool = ResStringPoolChunk.parseFrom(mStreamer);
+        stream.seek(baseCursor + chunk.typeStringOffset);
+        chunk.typeStringPool = ResStringPoolChunk.parseFrom(stream);
+        stream.seek(baseCursor + chunk.keyStringOffset);
+        chunk.keyStringPool = ResStringPoolChunk.parseFrom(stream);
 
         // TableTypeSpecType   TableTypeType
-        mStreamer.seek(chunk.keyStringOffset + chunk.keyStringPool.header.chunkSize);
+        stream.seek(baseCursor + chunk.keyStringOffset + chunk.keyStringPool.header.chunkSize);
         chunk.typeChunks = new ArrayList<>();
         int resCount = 0;
         StringBuilder logInfo = new StringBuilder();
-        while (mStreamer.available() > 0) {
-            int x = mStreamer.available();
+        while (stream.available() > 0) {
+
             logInfo.setLength(0);
             resCount++;
-            ChunkHeader header = ChunkHeader.parseFrom(mStreamer);
+            ChunkHeader header = ChunkHeader.parseFrom(stream);
 
             BaseTypeChunk typeChunk = null;
             if (header.type == RES_TABLE_TYPE_SPEC_TYPE) {
-                mStreamer.seek(mStreamer.getPosition() - ChunkHeader.LENGTH);
-                typeChunk = ResTableTypeSpecChunk.parseFrom(mStreamer, stringChunk);
+                stream.seek(stream.getPointer() - ChunkHeader.LENGTH);
+                typeChunk = ResTableTypeSpecChunk.parseFrom(stream, stringChunk);
             } else if (header.type == RES_TABLE_TYPE_TYPE) {
-                mStreamer.seek(mStreamer.getPosition() - ChunkHeader.LENGTH);
-                typeChunk = ResTableTypeInfoChunk.parseFrom(mStreamer, stringChunk);
+                stream.seek(stream.getPointer() - ChunkHeader.LENGTH);
+                typeChunk = ResTableTypeInfoChunk.parseFrom(stream, stringChunk);
             }
             if (typeChunk != null) {
                 logInfo.append(typeChunk.getChunkName()).append(" ")

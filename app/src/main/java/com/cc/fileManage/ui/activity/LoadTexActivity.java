@@ -17,6 +17,7 @@ import com.cc.fileManage.R;
 import com.cc.fileManage.databinding.ActicityTexBinding;
 import com.cc.fileManage.entity.TEXFile;
 import com.cc.fileManage.entity.file.FileApi;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.module.file.MergePng;
 import com.cc.fileManage.task.tex.LoadTexFileTask;
 import com.cc.fileManage.task.tex.SaveTexFileTask;
@@ -80,11 +81,14 @@ public class LoadTexActivity extends BaseActivity
         texPath = intent.getStringExtra("path");
         //文件
         if(texPath != null){
-            File file = new File(texPath);
+            MFile file = MFile.create(this, texPath);
             //设置名称
             binding.openTexToolbar.setTitle(file.getName());
             //载入图片
             openTexFile(file);
+        } else {
+            Toast.makeText(this, "文件不存在", Toast.LENGTH_SHORT).show();
+            finish();
         }
     }
 
@@ -130,7 +134,7 @@ public class LoadTexActivity extends BaseActivity
      * @param file tex文件
      */
     @SuppressLint("SetTextI18n")
-    private void openTexFile(File file){
+    private void openTexFile(MFile file){
         try {
             LoadTexFileTask load = new LoadTexFileTask(this, file);
             load.setLoadImageListener((bitmap, texFile) -> {

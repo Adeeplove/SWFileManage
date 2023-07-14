@@ -139,8 +139,7 @@ public class SplitPng {
                 return BitmapFactory.decodeFile(manageFile.getPath());
             } else {
                 //实例化
-                File file = new File(manageFile.getPath());
-                TEXFile texFile = TexFileUtil.openTexFile(file);
+                TEXFile texFile = TexFileUtil.openTexFile(manageFile);
                 if(texFile == null) return null;
                 //
                 Bitmap bitmap = TexFileUtil.loadTexBitmap(texFile);

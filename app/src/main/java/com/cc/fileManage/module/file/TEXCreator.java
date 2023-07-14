@@ -13,7 +13,7 @@ import com.github.memo33.jsquish.Squish;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +52,7 @@ public class TEXCreator
 	 * @param outputStream	文件输出流
 	 * @throws Exception	Exception
 	 */
-	public void convertPNGToTex(Bitmap inputImage, FileOutputStream outputStream) throws Exception
+	public void convertPNGToTex(Bitmap inputImage, OutputStream outputStream) throws Exception
 	{
 		List<TEXFile.Mipmap> Mipmaps = new ArrayList<>();
 		//翻转图片

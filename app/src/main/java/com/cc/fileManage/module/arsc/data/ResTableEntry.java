@@ -2,6 +2,7 @@ package com.cc.fileManage.module.arsc.data;
 
 import androidx.annotation.NonNull;
 
+import com.cc.fileManage.module.stream.BoundedInputStream;
 import com.cc.fileManage.module.stream.Utils;
 import com.cc.fileManage.module.stream.PositionInputStream;
 
@@ -29,16 +30,16 @@ public class ResTableEntry {
     public int entryId; // 16bit  0x7f01nnnn
     public String keyStr;
 
-    public static ResTableEntry parseFrom(PositionInputStream mStreamer) throws IOException {
+    public static ResTableEntry parseFrom(BoundedInputStream stream) throws IOException {
         ResTableEntry entry = new ResTableEntry();
-        parseFrom(mStreamer, entry);
+        parseFrom(stream, entry);
         return entry;
     }
 
-    public static void parseFrom(PositionInputStream mStreamer, ResTableEntry entry) throws IOException {
-        entry.size = Utils.readShort(mStreamer);
-        entry.flags = Utils.readShort(mStreamer);
-        entry.key = ResStringPoolRef.parseFrom(mStreamer);
+    public static void parseFrom(BoundedInputStream stream, ResTableEntry entry) throws IOException {
+        entry.size = stream.readShortLow();
+        entry.flags = stream.readShortLow();
+        entry.key = ResStringPoolRef.parseFrom(stream);
     }
     
     @NonNull

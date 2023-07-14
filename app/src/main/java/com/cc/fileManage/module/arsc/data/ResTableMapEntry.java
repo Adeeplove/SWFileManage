@@ -1,5 +1,6 @@
 package com.cc.fileManage.module.arsc.data;
 
+import com.cc.fileManage.module.stream.BoundedInputStream;
 import com.cc.fileManage.module.stream.Utils;
 import com.cc.fileManage.module.stream.PositionInputStream;
 
@@ -18,16 +19,16 @@ public class ResTableMapEntry extends ResTableEntry {
     public long count;          // Num of ResTableMap following.
     public ResTableMap[] resTableMaps;
 
-    public static ResTableMapEntry parseFrom(PositionInputStream mStreamer) throws IOException {
+    public static ResTableMapEntry parseFrom(BoundedInputStream stream) throws IOException {
         ResTableMapEntry entry = new ResTableMapEntry();
-        ResTableEntry.parseFrom(mStreamer, entry);
+        ResTableEntry.parseFrom(stream, entry);
 
-        entry.parent = ResTableRef.parseFrom(mStreamer);
-        entry.count = Utils.readInt(mStreamer);
+        entry.parent = ResTableRef.parseFrom(stream);
+        entry.count = stream.readIntLow();
 
         entry.resTableMaps = new ResTableMap[(int) entry.count];
         for (int i = 0; i < entry.count; ++i) {
-            entry.resTableMaps[i] = ResTableMap.parseFrom(mStreamer);
+            entry.resTableMaps[i] = ResTableMap.parseFrom(stream);
         }
 
         return entry;

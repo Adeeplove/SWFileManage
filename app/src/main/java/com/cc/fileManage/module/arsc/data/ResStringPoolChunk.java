@@ -1,10 +1,8 @@
 package com.cc.fileManage.module.arsc.data;
 
-import com.cc.fileManage.module.stream.Utils;
-import com.cc.fileManage.module.stream.PositionInputStream;
+import com.cc.fileManage.module.stream.BoundedInputStream;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,16 +39,17 @@ public class ResStringPoolChunk {
     public List<String> strings;
     public List<String> styles;
 
-    public static ResStringPoolChunk parseFrom(PositionInputStream mStreamer) throws IOException {
-        long baseCursor = mStreamer.getPosition();
+    public static ResStringPoolChunk parseFrom(BoundedInputStream stream) throws IOException {
+        long baseCursor = stream.getPointer();
 
         ResStringPoolChunk chunk = new ResStringPoolChunk();
-        chunk.header = ChunkHeader.parseFrom(mStreamer);
-        chunk.stringCount = Utils.readInt(mStreamer);
-        chunk.styleCount = Utils.readInt(mStreamer);
-        chunk.flags = Utils.readInt(mStreamer); // read flag
-        chunk.stringsStart = Utils.readInt(mStreamer);
-        chunk.stylesStart = Utils.readInt(mStreamer);
+        chunk.header = ChunkHeader.parseFrom(stream);
+        chunk.stringCount = stream.readIntLow();
+        chunk.styleCount = stream.readIntLow();
+        chunk.flags = stream.readIntLow(); // read flag
+        chunk.stringsStart = stream.readIntLow();
+        chunk.stylesStart = stream.readIntLow();
+        ///
 
         // the string index is sorted by the string values if true
         boolean sorted = (chunk.flags & SORTED_FLAG) != 0;
@@ -64,14 +63,14 @@ public class ResStringPoolChunk {
 
         // read strings offset
         for (int i = 0; i < chunk.stringCount; ++i) {
-            strOffsets[i] = Utils.readInt(mStreamer);
+            strOffsets[i] = stream.readIntLow();
         }
         for (int i = 0; i < chunk.styleCount; ++i) {
-            styleOffsets[i] = Utils.readInt(mStreamer);
+            styleOffsets[i] = stream.readIntLow();
         }
         for (int i = 0; i < chunk.stringCount; ++i) {
             long start = baseCursor + chunk.stringsStart + strOffsets[i];
-            mStreamer.seek(start);
+            stream.seek(++start);
             //int len = (Utils.readShort(mStreamer) & 0x7f00) >> 8;
             //int len = Utils.readShort(mStreamer);
             /*
@@ -94,26 +93,26 @@ public class ResStringPoolChunk {
             if (utf8) {
                 //  The lengths are encoded in the same way as for the 16-bit format
                 // but using 8-bit rather than 16-bit integers.
-                int strlen = Utils.readUInt8(mStreamer);
-                int len = Utils.readUInt8(mStreamer);
-                String str = Utils.readString(mStreamer, len);
+                int len = stream.readUInt8();
+                String str = stream.readString(len);
                 strings.add(str);
             } else {
                 // The length is encoded as either one or two 16-bit integers as per the commentRef...
                 //int len = (Utils.readShort(mStreamer) & 0x7f00) >> 8;
-                int len = Utils.readShort(mStreamer);
-                String str = Utils.readString16(mStreamer, len * 2);
+                int len = stream.readShortLow();
+                String str = stream.readString16(len * 2);
                 strings.add(str);
             }
+            //
             //String str = Utils.readString16(mStreamer, len); // The last byte is 0x00
             //String str = s.readNullEndString(len); // The last byte is 0x00
         }
         for (int i = 0; i < chunk.styleCount; ++i) {
             long start = baseCursor + chunk.stylesStart + styleOffsets[i];
-            mStreamer.seek(start);
-            int len = (Utils.readShort(mStreamer) & 0x7f00) >> 8;
+            stream.seek(++start);
+            int len = (stream.readShortLow() & 0x7f00) >> 8;
             //String str = Utils.readString32(mStreamer, len); // The last byte is 0x00
-            String str = Utils.readString(mStreamer, len);
+            String str = stream.readString(len);
             styles.add(str);
         }
 

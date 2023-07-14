@@ -26,7 +26,6 @@ import com.cc.fileManage.ui.views.ConvertTexDialog;
 import com.cc.fileManage.ui.views.ListItemDialog;
 import com.cc.fileManage.ui.views.RenameFileView;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -245,11 +244,10 @@ public class FileOperations {
         //后缀名
         String fileSuffix = file.getName().toLowerCase();
         if(fileSuffix.endsWith(".txt") || fileSuffix.endsWith(".lua")
-            || fileSuffix.endsWith(".log") || fileSuffix.endsWith(".java")
-                || fileSuffix.endsWith(".dex")){
+            || fileSuffix.endsWith(".log") || fileSuffix.endsWith(".java")){
             //文本文件
             Intent intent = new Intent(fragment.requireContext(), EditActivity.class);
-            intent.putExtra("uri", file.getUri());
+            intent.putExtra("path", file.getPath());
             fragment.startActivity(intent);
             return true;
         }
@@ -327,7 +325,7 @@ public class FileOperations {
             convertTexDialog.setOnStartClickListener((format, type, isGenerate, isMultiplyAlpha, isBackup) -> {
                 //
                 ConvertTexTask convertTexCallback =
-                        new ConvertTexTask(fragment.requireContext(), new File(file.getPath()));
+                        new ConvertTexTask(fragment.requireContext(), file);
                 convertTexCallback.setPixelFormat(format);
                 convertTexCallback.setTextureType(type);
                 convertTexCallback.setGenerateMipmaps(isGenerate);

@@ -1,7 +1,5 @@
 package com.cc.fileManage.ui.activity;
 
-import android.content.ContentResolver;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -10,16 +8,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.cc.fileManage.databinding.ActivityEditBinding;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.task.StandardMsgTask;
-
-import java.io.File;
+import com.cc.fileManage.utils.AntZipUtil;
 
 public class EditActivity extends BaseActivity {
 
     private ActivityEditBinding binding;
 
     //file
-    private Uri uri;
+    private MFile file;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -34,9 +32,11 @@ public class EditActivity extends BaseActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         //文件路径
-        this.uri = getIntent().getParcelableExtra("uri");
-        if(uri != null)
+        final String path = getIntent().getStringExtra("path");
+        if(path != null) {
+            file = MFile.create(this, path);
             readFileContent();
+        }
     }
 
 
@@ -76,17 +76,7 @@ public class EditActivity extends BaseActivity {
             @Override
             public String doMethod() {
                 try {
-                    String suffix = uri.getLastPathSegment().toLowerCase();
-                    if(uri.getScheme().equals(ContentResolver.SCHEME_FILE)) {
-                        File file = new File(uri.getPath());
-                        ///
-                        if(file.exists() && file.isFile() && file.canRead()) {
-//                            FileInputStream inputStream = new FileInputStream(file);
-                        }
-                    } else {
-//                        @SuppressLint("Recycle")
-//                        InputStream inputStream = getContentResolver().openInputStream(uri);
-                    }
+                    return AntZipUtil.readInputStream(file.openInputStream());
                 } catch (Exception e) {
                    e.printStackTrace();
                 }

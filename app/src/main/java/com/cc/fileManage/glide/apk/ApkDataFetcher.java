@@ -97,74 +97,74 @@ public class ApkDataFetcher implements DataFetcher<Bitmap> {
     // 读取apk信息
     private Bitmap loadIcon() {
         //
-        try (ZipInput zipInput = new ZipInput(file)){
-            ZipEntry entry = zipInput.getEntry("AndroidManifest.xml");
-            if(entry != null) {
-                InputStream inputStream = zipInput.getInputStream(entry);
-                if(inputStream != null) {
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    ///
-                    String id = "";
-                    if(id != null) {
-                        entry = zipInput.getEntry("resources.arsc");
-                        String resPath = loadIcon(zipInput.getInputStream(entry), Integer.parseInt(id, 16));
-                        if(!TextUtils.isEmpty(resPath)) {
-                            Log.e("e", "resPath： "+resPath);
-                            entry = zipInput.getEntry(resPath);
-                            if(entry != null) {
-                                Drawable drawable = Drawable
-                                        .createFromStream(zipInput.getInputStream(entry), entry.getName());
-                                return drawable2Bitmap(drawable);
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try (ZipInput zipInput = new ZipInput(file)){
+//            ZipEntry entry = zipInput.getEntry("AndroidManifest.xml");
+//            if(entry != null) {
+//                InputStream inputStream = zipInput.getInputStream(entry);
+//                if(inputStream != null) {
+//                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//                    ///
+//                    String id = "";
+//                    if(id != null) {
+//                        entry = zipInput.getEntry("resources.arsc");
+//                        String resPath = loadIcon(zipInput.getInputStream(entry), Integer.parseInt(id, 16));
+//                        if(!TextUtils.isEmpty(resPath)) {
+//                            Log.e("e", "resPath： "+resPath);
+//                            entry = zipInput.getEntry(resPath);
+//                            if(entry != null) {
+//                                Drawable drawable = Drawable
+//                                        .createFromStream(zipInput.getInputStream(entry), entry.getName());
+//                                return drawable2Bitmap(drawable);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         return null;
     }
 
     // id
-    private String loadIcon(InputStream inputStream, int resId) throws Exception{
-        if(inputStream == null) return null;
-        ////
-        ArscFile arscFile = new ArscFile();
-        arscFile.parse(AntZipUtil.streamToByteArray(inputStream));
-        ////
-        List<ResTableTypeInfoChunk> chunkList = new ArrayList<>();
-        long pkgId = (resId & 0xff000000L) >> 24;
-        //short packageId = (short) (resId >> 24 & 0xff);
-        if (arscFile.resTablePackageChunk.pkgId == pkgId) {
-            int typeId = (resId & 0x00ff0000) >> 16;
-            List<BaseTypeChunk> typeList = arscFile.resTablePackageChunk.typeInfoIndexer.get(typeId);
-            if(typeList != null && typeList.size() > 0) {
-                for (int i = 1; i < typeList.size(); ++i) {
-                    if (typeList.get(i) instanceof ResTableTypeInfoChunk) {
-                        ResTableTypeInfoChunk infoChunk = (ResTableTypeInfoChunk) typeList.get(i);
-                        chunkList.add(infoChunk);
-                    }
-                }
-            }
-        }
-        ///////////////////////////////
-        int entryId = resId & 0x0000ffff, density = 0;
-        String resPath = null;
-        for (ResTableTypeInfoChunk chunk : chunkList) {
-            if(chunk.resConfig.density == 0 || chunk.resConfig.density == 0xFFFF) continue;
-            //
-            if(chunk.resConfig.density >= density) {
-                String path = chunk.getResPath(entryId);
-                if(!TextUtils.isEmpty(path) && !path.toLowerCase().endsWith(".xml")) {
-                    resPath = path;
-                    density = chunk.resConfig.density;
-                }
-            }
-        }
-        arscFile.close();
-        return resPath;
-    }
+//    private String loadIcon(InputStream inputStream, int resId) throws Exception{
+//        if(inputStream == null) return null;
+//        ////
+//        ArscFile arscFile = new ArscFile();
+//        arscFile.parse(AntZipUtil.streamToByteArray(inputStream));
+//        ////
+//        List<ResTableTypeInfoChunk> chunkList = new ArrayList<>();
+//        long pkgId = (resId & 0xff000000L) >> 24;
+//        //short packageId = (short) (resId >> 24 & 0xff);
+//        if (arscFile.resTablePackageChunk.pkgId == pkgId) {
+//            int typeId = (resId & 0x00ff0000) >> 16;
+//            List<BaseTypeChunk> typeList = arscFile.resTablePackageChunk.typeInfoIndexer.get(typeId);
+//            if(typeList != null && typeList.size() > 0) {
+//                for (int i = 1; i < typeList.size(); ++i) {
+//                    if (typeList.get(i) instanceof ResTableTypeInfoChunk) {
+//                        ResTableTypeInfoChunk infoChunk = (ResTableTypeInfoChunk) typeList.get(i);
+//                        chunkList.add(infoChunk);
+//                    }
+//                }
+//            }
+//        }
+//        ///////////////////////////////
+//        int entryId = resId & 0x0000ffff, density = 0;
+//        String resPath = null;
+//        for (ResTableTypeInfoChunk chunk : chunkList) {
+//            if(chunk.resConfig.density == 0 || chunk.resConfig.density == 0xFFFF) continue;
+//            //
+//            if(chunk.resConfig.density >= density) {
+//                String path = chunk.getResPath(entryId);
+//                if(!TextUtils.isEmpty(path) && !path.toLowerCase().endsWith(".xml")) {
+//                    resPath = path;
+//                    density = chunk.resConfig.density;
+//                }
+//            }
+//        }
+//        arscFile.close();
+//        return resPath;
+//    }
 
     // Drawable转换成Bitmap
     private Bitmap drawable2Bitmap(Drawable drawable) {

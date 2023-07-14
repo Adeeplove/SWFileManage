@@ -24,11 +24,15 @@ public class RandomInputStream extends InputStream implements AutoCloseable{
     private final FileDescriptor descriptor;
     private final ParcelFileDescriptor fileDescriptor;
 
-    private long  mark;
+    private long  mark = 0L;
 
     public RandomInputStream(ParcelFileDescriptor fileDescriptor) {
         this.fileDescriptor = fileDescriptor;
         this.descriptor = fileDescriptor.getFileDescriptor();
+    }
+
+    public synchronized void markNow() {
+        this.mark = getPointer();
     }
 
     @Override
@@ -89,11 +93,21 @@ public class RandomInputStream extends InputStream implements AutoCloseable{
         return -1;
     }
 
-    private final byte[] buf = new byte[1];
+    private final byte[] buf = new byte[8];
     @Override
     public int read() throws IOException {
+        return (read(buf, 0, 1) != -1) ? buf[0] & 0xff : -1;
+    }
+
+    @Override
+    public int read(byte[] b) throws IOException {
+        return read(b, 0, b.length);
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
         try {
-            return (Os.read(descriptor, buf, 0, 1) > 0) ? buf[0] & 0xff : -1;
+            return Os.read(descriptor, b, off, len);
         } catch (ErrnoException e) {
             throw new IOException(e);
         }

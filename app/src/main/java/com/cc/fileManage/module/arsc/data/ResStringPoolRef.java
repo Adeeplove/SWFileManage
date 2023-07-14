@@ -1,7 +1,6 @@
 package com.cc.fileManage.module.arsc.data;
 
-import com.cc.fileManage.module.stream.Utils;
-import com.cc.fileManage.module.stream.PositionInputStream;
+import com.cc.fileManage.module.stream.BoundedInputStream;
 
 import java.io.IOException;
 
@@ -17,9 +16,9 @@ public class ResStringPoolRef {
 
     public long index;
 
-    public static ResStringPoolRef parseFrom(PositionInputStream mStreamer) throws IOException {
+    public static ResStringPoolRef parseFrom(BoundedInputStream mStreamer) throws IOException {
         ResStringPoolRef ref = new ResStringPoolRef();
-        ref.index = Utils.readInt(mStreamer);
+        ref.index = mStreamer.readIntLow();
         return ref;
     }
 }

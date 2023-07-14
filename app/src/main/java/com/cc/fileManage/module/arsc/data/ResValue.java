@@ -1,7 +1,6 @@
 package com.cc.fileManage.module.arsc.data;
 
-import com.cc.fileManage.module.stream.Utils;
-import com.cc.fileManage.module.stream.PositionInputStream;
+import com.cc.fileManage.module.stream.BoundedInputStream;
 
 import java.io.IOException;
 
@@ -60,12 +59,12 @@ public class ResValue {
     public long data;       // int index to data
     public String dataStr;
 
-    public static ResValue parseFrom(PositionInputStream mStreamer) throws IOException {
+    public static ResValue parseFrom(BoundedInputStream stream) throws IOException {
         ResValue value = new ResValue();
-        value.size = Utils.readShort(mStreamer);
-        value.res0 = Utils.readUInt8(mStreamer);
-        value.dataType = Utils.readUInt8(mStreamer);
-        value.data = Utils.readInt(mStreamer);
+        value.size = stream.readShortLow();
+        value.res0 = stream.readUInt8();
+        value.dataType = stream.readUInt8();
+        value.data = stream.readIntLow();
         return value;
     }
 

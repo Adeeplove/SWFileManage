@@ -1,5 +1,6 @@
 package com.cc.fileManage.module.arsc.data;
 
+import com.cc.fileManage.module.stream.BoundedInputStream;
 import com.cc.fileManage.module.stream.Utils;
 import com.cc.fileManage.module.stream.PositionInputStream;
 
@@ -12,7 +13,6 @@ import java.io.IOException;
  * @author bilux (i.bilux@gmail.com)
  *
  */
-
 public class ResFileHeaderChunk {
 
     public static final int LENGTH = 12;
@@ -20,10 +20,10 @@ public class ResFileHeaderChunk {
     public ChunkHeader header;
     public long packageCount;
 
-    public static ResFileHeaderChunk parseFrom(PositionInputStream mStreamer) throws IOException {
+    public static ResFileHeaderChunk parseFrom(BoundedInputStream stream) throws IOException {
         ResFileHeaderChunk chunk = new ResFileHeaderChunk();
-        chunk.header = ChunkHeader.parseFrom(mStreamer);
-        chunk.packageCount = Utils.readInt(mStreamer);
+        chunk.header = ChunkHeader.parseFrom(stream);
+        chunk.packageCount = stream.readIntLow();
         return chunk;
     }
 }

@@ -6,12 +6,11 @@ import android.graphics.Bitmap;
 
 import com.blankj.utilcode.util.ToastUtils;
 import com.cc.fileManage.entity.TEXFile;
+import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.task.AsynchronousTask;
 import com.cc.fileManage.utils.CommonUtil;
 import com.cc.fileManage.utils.TexFileUtil;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 
@@ -28,8 +27,8 @@ public class LoadTexFileTask extends AsynchronousTask<String, String, Bitmap>
     //监听
     private LoadImageListener loadImageListener;
 
-    public LoadTexFileTask(Context context, File texFile) throws FileNotFoundException {
-        this(context, new FileInputStream(texFile));
+    public LoadTexFileTask(Context context, MFile texFile) throws Exception {
+        this(context, texFile.openInputStream());
     }
 
     public LoadTexFileTask(Context context, InputStream inputFile){

@@ -4,13 +4,11 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 
 import com.cc.fileManage.entity.TEXFile;
+import com.cc.fileManage.entity.file.MFile;
 import com.github.memo33.jsquish.Squish;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -21,10 +19,9 @@ public class TexFileUtil {
      * @param file  tex文件
      * @return      TEXFile 失败时返回null
      */
-    public static TEXFile openTexFile(File file){
+    public static TEXFile openTexFile(MFile file){
         try {
-            FileInputStream fi = new FileInputStream(file);
-            return openTexFile(fi);
+            return openTexFile(file.openInputStream());
         } catch (Exception e){
             e.printStackTrace();
         }

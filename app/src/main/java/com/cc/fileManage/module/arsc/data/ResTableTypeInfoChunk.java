@@ -1,10 +1,8 @@
 package com.cc.fileManage.module.arsc.data;
 
-import com.cc.fileManage.module.stream.Utils;
-import com.cc.fileManage.module.stream.PositionInputStream;
+import com.cc.fileManage.module.stream.BoundedInputStream;
 
 import java.io.IOException;
-
 import java.util.List;
 
 /**
@@ -30,40 +28,40 @@ public class ResTableTypeInfoChunk extends BaseTypeChunk {
     public long[] entryOffsets;     // offset of table entries.
     public ResTableEntry[] tableEntries;
 
-    public static ResTableTypeInfoChunk parseFrom(PositionInputStream mStreamer, ResStringPoolChunk stringChunk) throws IOException {
+    public static ResTableTypeInfoChunk parseFrom(BoundedInputStream stream, ResStringPoolChunk stringChunk) throws IOException {
         ResTableTypeInfoChunk chunk = new ResTableTypeInfoChunk();
-        long start = mStreamer.getPosition();
-        chunk.header = ChunkHeader.parseFrom(mStreamer);
-        chunk.typeId = Utils.readUInt8(mStreamer);
-        chunk.res0 = Utils.readUInt8(mStreamer);
-        chunk.res1 = Utils.readShort(mStreamer);
-        chunk.entryCount = Utils.readInt(mStreamer);
-        chunk.entriesStart = Utils.readInt(mStreamer);
-        chunk.resConfig = ResTableConfig.parseFrom(mStreamer);
+        long start = stream.getPointer();
+        chunk.header = ChunkHeader.parseFrom(stream);
+        chunk.typeId = stream.readUInt8();
+        chunk.res0 = stream.readUInt8();
+        chunk.res1 = stream.readShortLow();
+        chunk.entryCount = stream.readIntLow();
+        chunk.entriesStart = stream.readIntLow();
+        chunk.resConfig = ResTableConfig.parseFrom(stream);
 
         // read offsets table
         chunk.entryOffsets = new long[(int) chunk.entryCount];
         for (int i = 0; i < chunk.entryCount; ++i) {
-            chunk.entryOffsets[i] = Utils.readInt(mStreamer);
+            chunk.entryOffsets[i] = stream.readIntLow();
         }
         // read entry
         chunk.tableEntries = new ResTableEntry[(int) chunk.entryCount];
-        mStreamer.seek(start + chunk.entriesStart); // Locate entry start point.
+        stream.seek(start + chunk.entriesStart); // Locate entry start point.
         for (int i = 0; i < chunk.entryCount; ++i) {
             // This is important!
             if (chunk.entryOffsets[i] == NO_ENTRY || chunk.entryOffsets[i] == -1) {
                 continue;
             }
 
-            long cursor = mStreamer.getPosition();     // Remember the start cursor
-            ResTableEntry entry = ResTableEntry.parseFrom(mStreamer);
+            long cursor = stream.getPointer();     // Remember the start cursor
+            ResTableEntry entry = ResTableEntry.parseFrom(stream);
 
-            mStreamer.seek(cursor);                 // Rest cursor
+            stream.seek(cursor);                 // Rest cursor
             // We need to parse entry into ResTableMapEntry instead of ResTableMapEntry
             if (entry.flags == ResTableEntry.FLAG_COMPLEX) {
-                entry = ResTableMapEntry.parseFrom(mStreamer);      // Complex ResTableMapEntry
+                entry = ResTableMapEntry.parseFrom(stream);      // Complex ResTableMapEntry
             } else {
-                entry = ResTableValueEntry.parseFrom(mStreamer);    // ResTableEntry follows a ResValue
+                entry = ResTableValueEntry.parseFrom(stream);    // ResTableEntry follows a ResValue
             }
             int x1 = entry.entryId;                 // Remember entry index in tableEntries to recover ids in public.xml
             int x2 = i;

@@ -2,7 +2,7 @@ package com.cc.fileManage.module.arsc.data;
 
 import androidx.annotation.NonNull;
 
-import com.cc.fileManage.module.stream.PositionInputStream;
+import com.cc.fileManage.module.stream.BoundedInputStream;
 
 import java.io.IOException;
 
@@ -18,10 +18,10 @@ public class ResTableValueEntry extends ResTableEntry {
 
     public ResValue resValue;       
 
-    public static ResTableValueEntry parseFrom(PositionInputStream mStreamer) throws IOException {
+    public static ResTableValueEntry parseFrom(BoundedInputStream stream) throws IOException {
         ResTableValueEntry entry = new ResTableValueEntry();
-        ResTableEntry.parseFrom(mStreamer, entry);
-        entry.resValue = ResValue.parseFrom(mStreamer);
+        ResTableEntry.parseFrom(stream, entry);
+        entry.resValue = ResValue.parseFrom(stream);
         //entry.entryId = entry.resValue.data;
         //entry.entryId = (int) entry.key.index;
         return entry;
