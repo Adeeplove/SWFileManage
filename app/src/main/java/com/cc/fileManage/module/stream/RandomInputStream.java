@@ -93,7 +93,7 @@ public class RandomInputStream extends InputStream implements AutoCloseable{
         return -1;
     }
 
-    private final byte[] buf = new byte[8];
+    private final byte[] buf = new byte[1];
     @Override
     public int read() throws IOException {
         return (read(buf, 0, 1) != -1) ? buf[0] & 0xff : -1;
@@ -155,46 +155,18 @@ public class RandomInputStream extends InputStream implements AutoCloseable{
         return input.toString();
     }
 
-    public final int readInt() throws IOException {
-        int ch1 = this.read();
-        int ch2 = this.read();
-        int ch3 = this.read();
-        int ch4 = this.read();
-        return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
-    }
-
-    public final long readLong() throws IOException {
-        return ((long)(readInt()) << 32) + (readInt() & 0xFFFFFFFFL);
-    }
-
-    public final float readFloat() throws IOException {
-        return Float.intBitsToFloat(readInt());
-    }
-
-    public final double readDouble() throws IOException {
-        return Double.longBitsToDouble(readLong());
-    }
-
-    public final boolean readBoolean() throws IOException {
-        int ch = this.read();
-        return (ch != 0);
-    }
-
-    public final byte readByte() throws IOException {
-        int ch = this.read();
-        return (byte)(ch);
-    }
-
     public final short readShort() throws IOException {
         int ch1 = this.read();
         int ch2 = this.read();
         return (short)((ch1 << 8) + (ch2 << 0));
     }
 
-    public final char readChar() throws IOException {
+    public final int readInt() throws IOException {
         int ch1 = this.read();
         int ch2 = this.read();
-        return (char)((ch1 << 8) + (ch2 << 0));
+        int ch3 = this.read();
+        int ch4 = this.read();
+        return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
     }
 
     public long length() {
@@ -212,17 +184,67 @@ public class RandomInputStream extends InputStream implements AutoCloseable{
     }
 
     @Override
-    public int available() throws IOException {
-        long l = length();
-        long i = getPointer();
-        if(l != -1 && i != -1) {
-            return (int) (l - i);
-        }
-        return super.available();
+    public int available() {
+        return (int) (length() - getPointer());
+    }
+
+    public CutStream getInputStream(long pos, long remaining) {
+        return new CutStream(this, pos, remaining);
     }
 
     @Override
     public void close() throws IOException {
         fileDescriptor.close();
+    }
+
+    /**
+     * 截断流
+     */
+    public static class CutStream extends InputStream {
+        //
+        private final long pos, foot;
+        private final RandomInputStream stream;
+
+        public CutStream(RandomInputStream stream, long pos, long remaining) {
+            this.stream = stream;
+            this.pos = pos;
+            this.foot = pos + remaining;
+        }
+
+        public void seek(long pos) throws IOException {
+            if(pos >= this.pos && pos <= foot)
+                stream.seek(pos);
+        }
+
+        public long getPointer() {
+            return stream.getPointer();
+        }
+
+        @Override
+        public int available() {
+            long p = getPointer();
+            if(foot > p)
+                return (int) (foot - p);
+            return 0;
+        }
+
+        @Override
+        public int read() throws IOException {
+            return stream.read();
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            return read(b, 0, b.length);
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            return stream.read(b, off, len);
+        }
+
+        public final void skipRemaining() throws IOException{
+            seek(foot);
+        }
     }
 }

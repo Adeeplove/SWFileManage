@@ -1,97 +1,58 @@
 package com.cc.fileManage.module.stream;
 
 import java.io.ByteArrayInputStream;
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
-/**
- *
- * @author bilux (i.bilux@gmail.com)
- */
-public class PositionInputStream extends FilterInputStream {
 
-    private long position = 0;
-    private long markedPosition = 0;
-    //
-    private long length = 0;
+public class PositionInputStream extends ByteArrayInputStream {
 
-    public static PositionInputStream getInstance(byte[] bytes) {
-        return new PositionInputStream(new ByteArrayInputStream(bytes)).setLength(bytes.length);
+    public PositionInputStream(byte[] buf) {
+        super(buf);
     }
 
-    public PositionInputStream(InputStream inputStream) {
-        super(inputStream);
-    }
-
-    public PositionInputStream(InputStream inputStream, long length) {
-        super(inputStream);
-        this.length = length;
+    public PositionInputStream(byte[] buf, int offset, int length) {
+        super(buf, offset, length);
     }
 
     public long length() {
-        return length;
+        return this.buf.length;
     }
 
-    private PositionInputStream setLength(long length) {
-        this.length = length;
-        return this;
+    public void setData(byte[] buf, int offset, int length) {
+        this.buf = buf;
+        this.pos = offset;
+        this.count = Math.min(offset + length, buf.length);
+        this.mark = offset;
     }
 
-    public synchronized long getPosition() {
-        return position;
+    public synchronized long getPointer() {
+        return this.pos;
     }
 
-    @Override
-    public synchronized int read() throws IOException {
-        int p = in.read();
-        if (p != -1)
-            position++;
-        return p;
+    public final void readFully(byte[] b) {
+        readFully(b, 0, b.length);
     }
-    
-    @Override
-    public synchronized int read(byte[] b) throws IOException {
-        int p = in.read(b);
-        if (p > 0)
-            position += p;        
-        return p;
+
+    public final void readFully(byte[] b, int off, int len) {
+        int n = 0;
+        do {
+            int count = this.read(b, off + n, len - n);
+            n += count;
+        } while (n < len);
     }
-    
-    @Override
-    public synchronized int read(byte[] b, int off, int len) throws IOException {
-        int p = in.read(b, off, len);
-        if (p > 0)
-            position += p;        
-        return p;
+
+    public synchronized long seek(long n) {
+        this.pos = 0;
+        return skip(n);
     }
 
     @Override
-    public synchronized long skip(long n) throws IOException {
-        long p = in.skip(n);
-        if (p > 0)
-            position += p;
-        return p;
-    }
-
-    public synchronized long seek(long n) throws IOException {
-        in.reset();
-        position = 0;
-        long p = in.skip(n);
-        if (p > 0)
-            position += p;
-        return p;
-    }
-    
-    @Override
-    public synchronized void reset() throws IOException {
-        in.reset();
-        position = markedPosition;
+    public synchronized void reset() {
+        seek(this.mark);
+        this.mark = 0;
     }
 
     @Override
-    public synchronized void mark(int readlimit) {
-        in.mark(readlimit);
-        markedPosition = position;
+    public synchronized void mark(int mark) {
+        this.mark = mark;
     }
 }

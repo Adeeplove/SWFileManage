@@ -8,8 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -18,19 +16,6 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.cc.fileManage.entity.file.JFile;
 import com.cc.fileManage.entity.file.MFile;
-import com.cc.fileManage.module.arsc.data.ArscFile;
-import com.cc.fileManage.module.arsc.data.BaseTypeChunk;
-import com.cc.fileManage.module.arsc.data.ResTableTypeInfoChunk;
-import com.cc.fileManage.utils.AXmlUtil;
-import com.cc.fileManage.utils.AntZipUtil;
-
-import org.apache.tools.zip.ZipEntry;
-import org.apache.tools.zip.ZipInput;
-
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ApkDataFetcher implements DataFetcher<Bitmap> {
 

@@ -28,8 +28,8 @@ import java.util.List;
 public class DFile extends MFile {
 
     private final Context   context;
-    private String    name;
-    private String    path;
+    private String          name;
+    private String          path;
     private final boolean   isDirectory;
     private final long      lastModified;
     private final long      length;

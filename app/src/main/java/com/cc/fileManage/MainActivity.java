@@ -25,17 +25,15 @@ import com.cc.fileManage._static.CSetting;
 import com.cc.fileManage.databinding.ActivityMainBinding;
 import com.cc.fileManage.entity.file.MFile;
 import com.cc.fileManage.module.ApplyPermission;
-import com.cc.fileManage.module.arsc.data.ArscFile;
+import com.cc.fileManage.module.manifest.MfFile;
 import com.cc.fileManage.module.stream.RandomInputStream;
 import com.cc.fileManage.ui.activity.BaseActivity;
 import com.cc.fileManage.ui.browser.FileBrowserFragment;
 import com.cc.fileManage.ui.views.RenameFileView;
-import com.cc.fileManage.utils.AntZipUtil;
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
 
-import java.io.RandomAccessFile;
 import java.util.List;
 
 public class MainActivity extends BaseActivity {
@@ -88,21 +86,6 @@ public class MainActivity extends BaseActivity {
         setSubtitleClick();
         // 申请权限
         requestAccess();
-        //
-//        new Handler().postDelayed(() -> {
-//            MFile file = MFile.create(MainActivity.this, "/storage/emulated/0/resources.arsc");
-//            try {
-//                long s = System.currentTimeMillis();
-//                RandomInputStream stream = new RandomInputStream(file.openFileDescriptor("r"));
-//                ArscFile arscFile = new ArscFile(stream);
-//                arscFile.parse();
-//
-////                System.out.println(arscFile.buildPublicXml());
-//                System.out.println("耗时: "+ (System.currentTimeMillis() - s) +"ms");
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }, 600);
     }
 
     /**
